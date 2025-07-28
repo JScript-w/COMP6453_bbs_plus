@@ -1,0 +1,8 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bbsplus"
+version = "0.1.0"
+dependencies = ["py-ecc>=8"]

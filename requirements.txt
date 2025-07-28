@@ -1,0 +1,2 @@
+py-ecc==8.*
+pytest>=7
