@@ -1,5 +1,5 @@
 import timeit
-from bbsplus import KeyPair, sign, verify
+from bbsplus_pyecc import KeyPair, sign, verify
 
 def bench(n_attrs: int, runs: int = 20):
     kp = KeyPair.generate()

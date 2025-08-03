@@ -1,0 +1,3 @@
+[submodule "bbsplus_binding_kss16/src/src/pairingma128"]
+	path = bbsplus_binding_kss16/src/src/pairingma128
+	url = https://github.com/eNipu/pairingma128.git

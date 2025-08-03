@@ -1,0 +1,16 @@
+[build-system]
+# scikit-build-core 调用 CMake；pybind11 只提供头文件
+requires = ["scikit-build-core>=0.7", "pybind11>=2.11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "bbsplus_binding_kss16"
+version = "0.1.0"
+description = "KSS-16 pairing backend for BBS+ (pybind11)"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.9"
+readme = "README.md"
+license = { text = "MIT" }
+
+[tool.scikit-build]
+wheel.packages = ["bbsplus_binding_kss16"]   # 把 python 包一起打进 wheel
