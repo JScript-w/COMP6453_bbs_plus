@@ -71,6 +71,15 @@ def g2_mul(Q, k: int):
 def msm_g1(bases, scalars):
     """
     多标量乘法
+
+    高效计算多个基点和标量的乘积和
+
+    Args:
+        bases (List[Point2D[Field]]): G1群点的列表[P1, P2, ..., Pn]
+        scalars (int): 标量列表[k1, k2, ..., kn]
+
+    Returns:
+        Point2D[Field]: ∑(Pi · ki) ∈ G1
     """
     acc = None
     for B, s in zip(bases, scalars):
@@ -82,6 +91,9 @@ def msm_g1(bases, scalars):
 def pair(P, Q):
     """
     双线性配对运算
+
+    Returns:
+
     """
     return final_exponentiate(pairing(Q, P))
 
