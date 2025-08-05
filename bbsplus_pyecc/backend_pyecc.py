@@ -28,6 +28,15 @@ def rand_scalar() -> int:
 
 
 def g1_mul(P, k: int):
+    """
+    计算生成元g1
+
+    这个函数接受参数P和k，返回生成元g1，
+
+    Args:
+        P (): ...
+        k (int): ...
+    """
     return multiply(P, k % curve_order)
 
 
