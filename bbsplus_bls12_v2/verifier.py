@@ -55,7 +55,7 @@ def verify(pk: dict, sig: tuple, messages: list[str]):
     left = pair(A, left_g2)  # e(A, X · Y^r) -> e(A, g2^(x + y·r))
 
     # 构建验证等式右边
-    # 即：e(g1 · h0^r · ∏h_i^m_i, g2)
+    # 即：e(g1 · h0^r · ∏hi^{mi}, g2)
     right = pair(msg_commit, g2)
 
     return left == right
