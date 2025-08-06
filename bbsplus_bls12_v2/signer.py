@@ -15,6 +15,9 @@ def _compute_A(x, y, r, h_bases, m_scalars):
         r (): 随机盲化因子
         h_bases (List[Point2D]): 基点序列[h0, h1, h2, ..., hL]
         m_scalars (int): 消息标量[m1, m2, ..., mL]
+
+    Returns:
+        Point2D: A ∈ G1
     """
 
     # 计算分母的模逆 1/(x + y*r)
@@ -78,4 +81,46 @@ def update_attributes(
     Returns:
         Tuple: 新签名 (A_new, r)
     """
-    pass
+
+    A_old, r = sig
+
+    # 更新消息
+    messages_new = messages_old[:]
+    for idx, new_value in updates.items():
+        messages_new[idx] = new_value
+
+    # 重新计算A
+    m_scalars = encode_attributes(messages_new)
+    A_new = _compute_A(keypair.x, keypair.y, r, keypair.h_bases, m_scalars)
+
+    return (A_new, r)
+
+
+def re_randomise_plus(keypair: KeyPair, sig, messages: list[str]):
+    """
+    BBS+签名随机化功能
+
+    生成同一消息的不同签名，提供不可链接性
+    和上一个函数一样都是更新签名，上面那个是通过更新消息得到新签名，这个是更新r
+    即：给定σ = (A, r)，生成σ' = (A', r')使得两个签名无法关联
+
+    Args:
+        keypair (KeyPair): 密钥对
+        sig (Tuple[Point2D, int]): 原始签名
+        messages (List[str]): 消息列表
+
+    Returns:
+        Tuple[Point2D, int]: 随机化后的签名(A', r')
+    """
+
+    A, r = sig
+    m_scalars = encode_attributes(messages)
+
+    # 生成随机增量
+    delta = rand_scalar()
+    r_new = (r + delta) % curve_order
+
+    # 重新计算A
+    A_new = _compute_A(keypair.x, keypair.y, r_new, keypair.h_bases, m_scalars)
+
+    return (A_new, r_new)
