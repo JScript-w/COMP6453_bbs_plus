@@ -1,5 +1,5 @@
 import timeit
-from bbsplus_pyecc import KeyPair, sign, verify
+from bbsplus_bls12_v1 import KeyPair, sign, verify
 
 
 def bench(n_attrs: int, runs: int = 20):
