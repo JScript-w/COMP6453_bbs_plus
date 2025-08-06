@@ -13,6 +13,7 @@ def verify(pk: dict, sig: tuple, messages: list[str]):
     BBS+签名验证算法
 
     计算公式：e(A, X · Y^r) = e(g1 · h0^r · ∏_{i=1}^{L}h_i^m_i, g2)
+
     验证原理:
     已知 e(aP, bQ) = e(P,Q)^{ab}，因此可得
     1. 左边: e(A, X · Y^r) = e(A, g2^x · g2^(y·r)) = e(A, g2^(x + y·r))
