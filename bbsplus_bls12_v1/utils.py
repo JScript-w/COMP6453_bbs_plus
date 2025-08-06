@@ -21,6 +21,9 @@ def hash_to_g1(label: bytes):
     标签到G1群元素的映射
 
     Map label to fixed point: g1 * H(label).
+
+    Returns:
+        Point2D: G1群上的元素
     """
     return g1_mul(g1, hash_to_scalar(label))
 
