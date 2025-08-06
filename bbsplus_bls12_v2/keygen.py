@@ -7,6 +7,10 @@ from bbsplus_bls12_v1.params import g2
 from bbsplus_bls12_v1.utils import hash_to_g1
 
 
+# 将slot设置为True可以：
+# 1. 不使用 __dict__存储属性，而是为每个属性预留固定大小的空间
+# 2. 由于属性存储在固定的内存位置，访问速度会比通过字典查找更快。
+# 3. 防止动态添加新属性
 @dataclass(slots=True)
 class KeyPair:
     """
@@ -54,3 +58,13 @@ class KeyPair:
             h_bases.append(hash_to_g1(label))  # 哈希映射到G1群得到独立基点
 
         return cls(x, y, X, Y, h_bases)
+
+    def get_pk(self):
+        """
+        提取公钥信息
+
+        Returns:
+            dict: 可以公开的密钥组件
+        """
+
+        return {"X": self.X, "Y": self.Y, "h_bases": self.h_bases}
