@@ -1,4 +1,5 @@
-from bbsplus_pyecc import KeyPair, sign, update_attributes, verify
+from bbsplus_bls12_v1 import KeyPair, sign, update_attributes, verify
+
 
 def test_update():
     kp = KeyPair.generate()

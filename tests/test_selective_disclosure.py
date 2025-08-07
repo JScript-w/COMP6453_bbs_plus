@@ -1,4 +1,5 @@
-from bbsplus_pyecc import KeyPair, sign, prove_disclosure, verify_disclosure
+from bbsplus_bls12_v1 import KeyPair, sign, prove_disclosure, verify_disclosure
+
 
 def test_proof():
     kp = KeyPair.generate()
