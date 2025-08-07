@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from .params import rand_scalar, g2_mul, g2
+from ..params import rand_scalar, g2_mul, g2
 
 
 @dataclass(slots=True)

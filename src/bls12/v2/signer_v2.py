@@ -1,6 +1,6 @@
-from keygen_v2 import KeyPair
-from bbsplus_bls12_v1.params import curve_order, g1, msm_g1, g1_mul, rand_scalar
-from utils_v2 import encode_attributes
+from .keygen_v2 import KeyPair
+from ..params import curve_order, g1, msm_g1, g1_mul, rand_scalar
+from .utils_v2 import encode_attributes
 
 
 def _compute_A(x, y, r, h_bases, m_scalars):

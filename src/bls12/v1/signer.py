@@ -1,4 +1,4 @@
-from .params import rand_scalar, g1_mul, g2_mul, msm_g1, pair, g1, g2, add, curve_order
+from ..params import rand_scalar, g1_mul, g2_mul, msm_g1, pair, g1, g2, add, curve_order
 from .utils import encode_attributes
 
 

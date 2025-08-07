@@ -5,7 +5,7 @@ Version: 0.1
 """
 
 import hashlib
-from bbsplus_bls12_v1.params import curve_order
+from ..params import curve_order
 
 
 def hash_to_scalar(data: bytes) -> int:

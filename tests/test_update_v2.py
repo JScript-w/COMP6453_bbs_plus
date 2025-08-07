@@ -1,7 +1,7 @@
-from bbsplus_bls12_v2 import KeyPair, sign, update_attributes, verify
+from bls12.v2 import KeyPair, sign, update_attributes, verify
 
 
-def test_update():
+def test_update_v2():
     kp = KeyPair.generate(5)
     msgs = ["m1", "m2", "m3"]
     sig = sign(kp, msgs)
