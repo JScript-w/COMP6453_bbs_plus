@@ -90,8 +90,8 @@ def verify_disclosure(pk, proof, total_attrs):
         if i in disclosed:
             term = g1_mul(h_bases[i], disclosed[i])
         else:
-            #   h_i^{s_i} · h_i^{-c}  =  h_i^{r_i + c·m_i} · h_i^{-c}
-            #                       =  h_i^{r_i} · h_i^{c(m_i-1)}
+            #   h_i^{s_i} · h_i^{-c·m_i}  =  h_i^{r_i + c·m_i} · h_i^{-c·m_i}
+            #                       =  h_i^{r_i} · h_i^{c(m_i-m_i)}
             #                       → 消掉 c·m_i，留下 h_i^{r_i}
             term = add(
                 g1_mul(h_bases[i], s_vec[i]),
