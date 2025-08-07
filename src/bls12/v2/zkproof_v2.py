@@ -1,5 +1,5 @@
 from hashlib import sha256
-from bbsplus_bls12_v1.params import (
+from ..params import (
     rand_scalar,
     g1_mul,
     g2_mul,
@@ -10,7 +10,7 @@ from bbsplus_bls12_v1.params import (
     pair,
     curve_order,
 )
-from utils_v2 import encode_attributes
+from .utils_v2 import encode_attributes
 
 
 def _hash_fs(elements: list) -> int:
@@ -231,5 +231,17 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
         *[disclosed_messages[i] for i in disclosed_messages.keys()],
     ]
     c_rebuilt = _hash_fs(challenge_elements)
+
+    if left == right:
+        print("左边 == 右边")
+    else:
+        print(left)
+        print(right)
+
+    if c == c_rebuilt:
+        print("挑战c == 重构的挑战c_rebuilt")
+    else:
+        print(c)
+        print(c_rebuilt)
 
     return left == right and c == c_rebuilt

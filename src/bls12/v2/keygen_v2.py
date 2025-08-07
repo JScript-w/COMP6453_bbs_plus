@@ -2,9 +2,8 @@ from dataclasses import dataclass
 
 from py_ecc.typing import Point2D
 
-from bbsplus_bls12_v1.backend_pyecc import g2_mul, rand_scalar
-from bbsplus_bls12_v1.params import g2
-from utils_v2 import hash_to_g1
+from ..params import g2_mul, rand_scalar, g2
+from .utils_v2 import hash_to_g1
 
 
 # 将slot设置为True可以：

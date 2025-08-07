@@ -1,5 +1,5 @@
 import hashlib
-from .params import rand_scalar, g1_mul, g1, curve_order
+from ..params import rand_scalar, g1_mul, g1, curve_order
 
 
 def hash_to_scalar(data: bytes) -> int:

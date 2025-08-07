@@ -1,4 +1,4 @@
-from bbsplus_bls12_v1 import KeyPair, sign, update_attributes, verify
+from bls12.v1 import KeyPair, sign, update_attributes, verify
 
 
 def test_update():
