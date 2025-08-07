@@ -1,4 +1,4 @@
-from bls12.v2 import KeyPair, sign, prove_disclosure, verify_disclosure
+from src.bls12.v2 import KeyPair, sign, prove_disclosure, verify_disclosure
 
 
 def test_proof_v2():

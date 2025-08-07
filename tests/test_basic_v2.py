@@ -1,4 +1,4 @@
-from bls12.v2 import KeyPair, sign, verify
+from src.bls12.v2 import KeyPair, sign, verify
 
 
 def test_sign_verify_v2():
