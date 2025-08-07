@@ -10,7 +10,7 @@ from bbsplus_bls12_v1.params import (
     pair,
     curve_order,
 )
-from bbsplus_bls12_v1.utils import encode_attributes
+from utils_v2 import encode_attributes
 
 
 def _hash_fs(elements: list) -> int:

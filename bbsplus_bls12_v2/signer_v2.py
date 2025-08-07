@@ -1,6 +1,6 @@
-from bbsplus_bls12_v2.keygen import KeyPair
+from keygen_v2 import KeyPair
 from bbsplus_bls12_v1.params import curve_order, g1, msm_g1, g1_mul, rand_scalar
-from bbsplus_bls12_v1.utils import encode_attributes
+from utils_v2 import encode_attributes
 
 
 def _compute_A(x, y, r, h_bases, m_scalars):
@@ -96,7 +96,7 @@ def update_attributes(
     return (A_new, r)
 
 
-def re_randomise_plus(keypair: KeyPair, sig, messages: list[str]):
+def re_randomise(keypair: KeyPair, sig, messages: list[str]):
     """
     BBS+签名随机化功能
 

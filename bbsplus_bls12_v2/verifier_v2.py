@@ -5,7 +5,7 @@ Version: v0.1
 """
 
 from bbsplus_bls12_v1.params import g1, g2, add, g2_mul, msm_g1, pair
-from bbsplus_bls12_v1.utils import encode_attributes
+from utils_v2 import encode_attributes
 
 
 def verify(pk: dict, sig: tuple, messages: list[str]):
