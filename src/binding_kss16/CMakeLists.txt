@@ -21,3 +21,16 @@ target_link_libraries(kss16core PRIVATE mclbn384_256)
 
 set_target_properties(kss16core PROPERTIES OSX_ARCHITECTURES "arm64")
 target_compile_features(kss16core PRIVATE cxx_std_17)
+# Minimum required version of CMake  
+# Define the project name and supported languages  
+# Disable MCL's assembly optimizations globally  
+# Add MCL source directory to the build  
+# Set up KSS16 curve and parameter sizes  
+# Use the KSS16 pairing-friendly curve  
+# Field size: 768 bits (8 x 64-bit words)  
+# Scalar field size: 256 bits (4 x 64-bit words)  
+# Locate pybind11 package  
+# Create a Python extension module from bindings.cpp  
+# Link the module with MCL  
+# Set build architecture to ARM64 for macOS  
+# Use C++17 standard  

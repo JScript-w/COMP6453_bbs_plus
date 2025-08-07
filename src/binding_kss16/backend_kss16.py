@@ -41,3 +41,22 @@ class _Backend:
 
 
 backend: CurveBackend = _Backend()  # 供外部 import
+# Ensure compatibility with future Python versions  
+# Secure random scalar generation  
+# Define a standard interface for curve operations  
+
+# Import G1, G2 group elements and pairing operation from the KSS16 core  
+# Define the curve order (example: 768-bit order for KSS16)  
+
+# Return a random scalar s such that 1 ≤ s < r  
+# Simplified mapping from bytes to G1 (not secure, for demo purposes only)  
+
+# Protocol defining a standard interface for elliptic curve backends  
+# Concrete backend implementation using KSS16  
+# Expose G1 group type  
+# Expose G2 group type  
+# Expose pairing operation  
+# Expose random scalar generator  
+# Expose hash-to-G1 mapping  
+
+# Provide the backend as a unified interface for external use  

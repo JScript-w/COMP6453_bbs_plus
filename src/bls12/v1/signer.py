@@ -56,3 +56,20 @@ def re_randomise(sig):
     A, e = sig
     r = rand_scalar()
     return A, (e + r) % curve_order
+# Internal ------------------------------------------------------------------ #
+# Compute parameter A used for signing and verification
+# Formula: A = (g1 * h0)
+
+# denom_inv = 1 / (x + e) mod curve_order
+# Compute multi-scalar multiplication of h_bases and m_scalars if available
+# Add g1 and h_part if h_part exists; otherwise use g1
+# Multiply the resulting point with denom_inv
+
+# Public API ---------------------------------------------------------------- #
+# Signing algorithm
+
+# Deterministic base points
+
+# Update messages and compute new A with the same e
+
+# Re-randomise signature with fresh random scalar r
