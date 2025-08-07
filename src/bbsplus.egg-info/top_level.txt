@@ -1,2 +1,2 @@
-binding_kss16
 bls12
+bn254

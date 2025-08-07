@@ -22,6 +22,15 @@ src/bls12/v2/signer_v2.py
 src/bls12/v2/utils_v2.py
 src/bls12/v2/verifier_v2.py
 src/bls12/v2/zkproof_v2.py
+src/bn254/__init__.py
+src/bn254/backend_pyecc.py
+src/bn254/params.py
+src/bn254/v1/__init__.py
+src/bn254/v1/keygen.py
+src/bn254/v1/signer.py
+src/bn254/v1/utils.py
+src/bn254/v1/verifier.py
+src/bn254/v1/zkproof.py
 tests/test_basic.py
 tests/test_basic_v2.py
 tests/test_selective_disclosure.py
