@@ -47,17 +47,18 @@ def verify_disclosure(pk, proof, total_attrs):
         if i in disclosed:
             term = g1_mul(h_bases[i], disclosed[i])
         else:
-            term = g1_mul(h_bases[i], (-c) % curve_order)
+            term = add(
+                g1_mul(h_bases[i], s_vec[i]),
+                g1_mul(h_bases[i], (-c) % curve_order),
+            )
         msg_commit = add(msg_commit, term)
 
     lhs = pair(A, add(pk, g2_mul(g2, e)))
     rhs = pair(msg_commit, g2)
 
     transcript = b"".join(
-        [
-            bytes(str(A), "utf8"),
-            *[int(disclosed[i]).to_bytes(32, "big") for i in sorted(disclosed)],
-            bytes(str(pk), "utf8"),
-        ]
+        [bytes(str(A), "utf8")]
+        + [int(disclosed[i]).to_bytes(32, "big") for i in sorted(disclosed)]
+        + [bytes(str(pk), "utf8")]
     )
     return lhs == rhs and c == _hash_fs(transcript)
