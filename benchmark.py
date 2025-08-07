@@ -1,5 +1,5 @@
 import timeit
-from bls12.v1 import KeyPair, sign, verify
+from src.bls12.v1 import KeyPair, sign, verify
 
 
 def bench(n_attrs: int, runs: int = 20):

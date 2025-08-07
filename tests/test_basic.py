@@ -1,4 +1,4 @@
-from bls12.v1 import KeyPair, sign, verify
+from src.bls12.v1 import KeyPair, sign, verify
 
 # This function tests the basic signing and verification process using BBS+.
     # First, it generates a new key pair (public and secret key),
