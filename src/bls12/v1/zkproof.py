@@ -8,6 +8,31 @@ def _hash_fs(data: bytes) -> int:
 
 
 def prove_disclosure(pk, sig, messages, disclose_idx):
+    r"""
+    Produce a non-interactive selective-disclosure proof for a BBS⁺ signature.
+
+    Let
+        g₁∈G₁, g₂∈G₂, e(·,·):G₁×G₂→G_T
+        hᵢ = g₁^{i+2}, pk = g₂ˣ, sig = (A,e) with
+        A = (g₁ · ∏_{i=0}^{ℓ−1} hᵢ^{mᵢ})^{1/(x+e)}.
+
+    Inputs
+    ------
+    pk           – issuer public key g₂ˣ
+    sig          – (A,e) as above
+    messages     – list [m₀,…,m_{ℓ−1}] ∈ 𝔽_p
+    disclose_idx – set D ⊂ {0,…,ℓ−1} of revealed positions
+
+    Protocol
+    --------
+    H ← {0,…,ℓ−1}\D
+    for i∈H : rᵢ ←$ 𝔽_p
+    c  = Hₚ(A ∥ {mᵢ}_{i∈D} ∥ pk)                  # Fiat–Shamir hash
+    sᵢ = rᵢ + c·mᵢ  mod p (i∈H)
+
+    Return proof
+    π = (A , e , c , {sᵢ}_{i∈H} , {mᵢ}_{i∈D})
+    """
     A, e = sig
     m_scalars = encode_attributes(messages)
     disclosed = {i: m_scalars[i] for i in disclose_idx}
@@ -35,6 +60,24 @@ def prove_disclosure(pk, sig, messages, disclose_idx):
 
 
 def verify_disclosure(pk, proof, total_attrs):
+    r"""
+    Verify a selective-disclosure proof π for BBS⁺.
+
+    Proof structure
+        π = (A , e , c , {sᵢ}_{i∈H} , {mᵢ}_{i∈D}), H∪D = {0,…,ℓ−1}, H∩D = ∅.
+
+    Step 1 – Rebuild commitment
+        C = g₁ · ∏_{i∈D} hᵢ^{mᵢ} · ∏_{i∈H} hᵢ^{sᵢ} · A^{-c}
+
+    Step 2 – Pairing check
+        e(A , pk·g₂ᵉ)  ==  e(C , g₂)
+
+    Step 3 – Fiat–Shamir consistency
+        c == Hₚ(A ∥ {mᵢ}_{i∈D} ∥ pk)
+
+    Accept iff all three conditions hold.
+    """
+
     A, e = proof["A"], proof["e"]
     c = proof["c"]
     s_vec = proof["s"]
