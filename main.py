@@ -17,6 +17,11 @@ def main():
         end = time.perf_counter()
         print(f"Time for basic test (bls12_v2): {end - start}")
 
+        start = time.perf_counter()
+        tests.test_basic_bn254.test_sign_verify_bn254()
+        end = time.perf_counter()
+        print(f"Time for basic test (bn254): {end - start}")
+
     elif test_type == 2:
         start = time.perf_counter()
         tests.test_selective_disclosure.test_proof()
@@ -28,6 +33,11 @@ def main():
         end = time.perf_counter()
         print(f"Time for selective disclosure test (bls12_v2): {end - start}")
 
+        start = time.perf_counter()
+        tests.test_selective_disclosure_bn254.test_proof_bn254()
+        end = time.perf_counter()
+        print(f"Time for selective disclosure test (bn254): {end - start}")
+
     elif test_type == 3:
         start = time.perf_counter()
         tests.test_update()
@@ -38,6 +48,11 @@ def main():
         tests.test_update_v2()
         end = time.perf_counter()
         print(f"Time for update test (bls12_v2): {end - start}")
+
+        start = time.perf_counter()
+        tests.test_update_bn254()
+        end = time.perf_counter()
+        print(f"Time for update test (bn254): {end - start}")
 
     else:
         start = time.perf_counter()

@@ -16,11 +16,15 @@ name = "bbsplus"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "mclbn256" },
     { name = "py-ecc" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "py-ecc", specifier = ">=8" }]
+requires-dist = [
+    { name = "mclbn256", specifier = ">=1.3.5" },
+    { name = "py-ecc", specifier = ">=8" },
+]
 
 [[package]]
 name = "cytoolz"
@@ -82,6 +86,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/0d/49/bee95f16d2ef068097afeeffbd6c67738107001ee57ad7bcdd4fc4d3c6a7/eth_utils-5.3.0.tar.gz", hash = "sha256:1f096867ac6be895f456fa3acb26e9573ae66e753abad9208f316d24d6178156", size = 123753, upload-time = "2025-04-14T19:35:56.431Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c4/c6/0417a92e6a3fc9b85f5a8380d9f9d43b69ba836a90e45f79f9ae74d41e53/eth_utils-5.3.0-py3-none-any.whl", hash = "sha256:ac184883ab299d923428bbe25dae5e356979a3993e0ef695a864db0a20bc262d", size = 102531, upload-time = "2025-04-14T19:35:55.176Z" },
+]
+
+[[package]]
+name = "mclbn256"
+version = "1.3.5"
+source = { registry = "https://pypi.org/simple" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/90/90/d2e1e240c08f97808f4662a1b1e3dea5dcaa911fa0de6ae1781e2c087c4d/mclbn256-1.3.5-py3-none-macosx_10_15_x86_64.whl", hash = "sha256:ba8ebdc982fbd031ca53e49fa6feae386566e13848792e8fa85447fa4e047903", size = 2684542, upload-time = "2023-11-18T02:08:41.301Z" },
+    { url = "https://files.pythonhosted.org/packages/7a/34/5390c8078cc572c6a2e53cede1a8393a67690b784005dc81dd85bb3ea049/mclbn256-1.3.5-py3-none-macosx_11_0_universal2.whl", hash = "sha256:927678cdf191e6dc858f64949b02dee19f752f958a8c8e4a30e1276f5d266cd9", size = 2720385, upload-time = "2023-11-18T02:08:45.04Z" },
+    { url = "https://files.pythonhosted.org/packages/e0/f0/a15a021aa3008300dccb0901fc5ff93a236033867d4a7a4d16d13e81b0f7/mclbn256-1.3.5-py3-none-macosx_12_0_arm64.whl", hash = "sha256:ae7d8b89246ea4761673e24f887c4e808b917a9a5b0979baaabefe9c6a8edd5c", size = 1672076, upload-time = "2023-11-18T02:08:50.538Z" },
+    { url = "https://files.pythonhosted.org/packages/ef/8d/36dc5093d3bfd288f5d010c6818b3d6d4649df512571bcead4feab53e046/mclbn256-1.3.5-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:ac84fa8fc21a42f220c6c4b46e3941fce7e016931956fce709f2e596cb67bc37", size = 21585244, upload-time = "2023-11-18T02:09:01.145Z" },
+    { url = "https://files.pythonhosted.org/packages/4b/e8/b0ffbf07988303f9d1e9530decd4c84b8fe16036356b54f55fc961efc9b6/mclbn256-1.3.5-py3-none-win32.whl", hash = "sha256:3eb524fdaaef2c8f245e70b527b122391042a9c7444199a19effd4bc05cb9808", size = 1483906, upload-time = "2023-11-18T02:09:08.105Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/00/40621b7bdf7c5da113e4a215e3a6b7bd58a10e650b64a90fe6c00cc5cb1a/mclbn256-1.3.5-py3-none-win_amd64.whl", hash = "sha256:6ce6c8764ca87984aa05801b4c737608f51a1399b6165718661ce490b16d27c4", size = 1483910, upload-time = "2023-11-18T02:09:06.181Z" },
 ]
 
 [[package]]

@@ -5,12 +5,12 @@ from .utils_v2 import encode_attributes
 
 def compute_A(keypair: KeyPair, r, h_bases, m_scalars):
     """
-    计算BBS+签名的核心分量A
+    Calculate the core component A of BBS+ signature
 
-    具体公式：A = (g1 * h0^r * ∏_{i=1}^L h_i^m_i)^(1/(x + y * r))
+    Formula: A = (g1 * h0^r * ∏_{i=1}^L h_i^m_i)^(1/(x + y * r))
 
     Args:
-        r (): 随机盲化因子
+        r (int): Randomization factor
         h_bases (List[Point2D]): 基点序列[h0, h1, h2, ..., hL]
         m_scalars (int): 消息标量[m1, m2, ..., mL]
 
