@@ -1,56 +1,57 @@
 """
-增强工具函数
+Enhanced tool functions
 
 Version: 0.1
 """
 
 import hashlib
-from ..params import curve_order
+from ..params import curve_order, g1_mul, g1
 
 
 def hash_to_scalar(data: bytes) -> int:
     """
-    安全的哈希到标量映射
+    Secure hash-to-scalar mapping
 
-    功能: 将任意字节串安全地映射到Zp
-    安全性: 使用域分离防止不同用途的哈希冲突
+    Functionality: Securely maps any byte string to Zp
+    Security: Uses domain separation to prevent hash collisions between different uses
 
     Args:
-        data (bytes): 输入字节串
+        data (bytes): Input byte string
+
     Returns:
-        int: 标量 ∈ Zp
+        int: Scalar ∈ Zp
     """
 
-    # 添加域分离前缀
+    # Add domain separation prefix
     digest = hashlib.sha256(b"BBS_PLUS_H2S_" + data).digest()
 
-    # 映射到标量域，同时避免0值
+    # Map to scalar domain while avoiding zero values
     return int.from_bytes(digest, "big") % curve_order or 1
 
 
 def hash_to_g1(label: bytes):
     """
-    使用RFC标准的hash-to-curve算法安全的哈希到G1群映射
+    Secure hash-to-curve mapping to G1 groups using RFC standard hash-to-curve algorithms
 
     Args:
-        label (bytes): 输入标签
+        label (bytes): Input label
 
     Returns:
-        Point2D: G1群元素
+        Point2D: G1 group elements
     """
 
-    pass
+    return g1_mul(g1, hash_to_scalar(label))
 
 
 def encode_attributes(attrs: list[str]) -> list[int]:
     """
-    属性编码函数
+    Attribute encoding function
 
     Args:
-        attrs (List[str]): 属性字符串列表
+        attrs (List[str]): List of attribute strings
 
     Returns:
-        List[int]: 标量列表
+        List[int]: List of scalars
     """
 
     return [hash_to_scalar(a.encode()) for a in attrs]

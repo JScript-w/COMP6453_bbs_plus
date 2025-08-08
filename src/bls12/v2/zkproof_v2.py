@@ -18,25 +18,25 @@ from .utils_v2 import encode_attributes
 
 def _hash_fs(elements: list) -> int:
     """
-    Fiat-Shamir 哈希函数
+    Fiat-Shamir Hash Function
 
-    功能: 将Sigma协议交互式证明转换为非交互式证明
+    Function: Convert Sigma protocol interactive proofs to non-interactive proofs
 
     Args:
-        elements (List): 需要哈希的元素列表
+        elements (List): List of elements requiring hashing
 
     Returns:
-        int: 生成的挑战值 c ∈ Zp
+        int: Generated challenge value c ∈ Zp
     """
 
-    data = b"BBS_PLUS_PROOF_V1"  # 域分离标识，防止哈希冲突
+    data = b"BBS_PLUS_PROOF_V1"  # Domain separation identification to prevent hash collisions
     for e in elements:
         if isinstance(e, bytes):
             data += e
         elif isinstance(e, int):
-            data += e.to_bytes(32, "big")  # 标量转字节
+            data += e.to_bytes(32, "big")  # Scalar to bytes
         else:
-            data += str(e).encode()  # 元素转字符串再转字节
+            data += str(e).encode()  # Convert elements to strings and then to bytes
 
     # 将数据哈希到标量域
     return int.from_bytes(sha256(data).digest(), "big") % curve_order
@@ -191,11 +191,7 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
     ]
     c_rebuilt = _hash_fs(challenge_elements)
 
-    if c == c_rebuilt:
-        print("挑战c == 重构的挑战c_rebuilt")
-    else:
-        print(c)
-        print(c_rebuilt)
+    if c != c_rebuilt:
         return False
 
     # 验证第二阶段：重建承诺值

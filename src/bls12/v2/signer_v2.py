@@ -11,57 +11,57 @@ def compute_A(keypair: KeyPair, r, h_bases, m_scalars):
 
     Args:
         r (int): Randomization factor
-        h_bases (List[Point2D]): 基点序列[h0, h1, h2, ..., hL]
+        h_bases (List[Point2D]): Base sequence[h0, h1, h2, ..., hL]
         m_scalars (int): 消息标量[m1, m2, ..., mL]
 
     Returns:
         Point2D: A ∈ G1
     """
 
-    # 提取私钥
-    # x (int): 私钥分量1
-    # y (int): 私钥分量2
+    # Extract private key
+    # x (int): Private key component 1
+    # y (int): Private key component 2
     x = keypair.x
     y = keypair.y
 
-    # 计算分母的模逆 1/(x + y*r)
-    # 即：denom = (x + y*r) mod p，denom_inv = denom^(-1) mod p
+    # Calculate the reciprocal of the denominator 1/(x + y*r)
+    # e.g., denom = (x + y*r) mod p，denom_inv = denom^(-1) mod p
     denom = (x + y * r) % curve_order
     denom_inv = pow(denom, -1, curve_order)
 
-    # 计算多标量乘法的输入
-    # 即：g1 * h0^r * ∏_{i=1}^L h_i^m_i
-    scalars = [1, r] + m_scalars  # 指数序列[1, r, m1, m2, ..., mL]
+    # Calculate the input for multi-scalar multiplication
+    # e.g., g1 * h0^r * ∏_{i=1}^L h_i^m_i
+    scalars = [1, r] + m_scalars  # exponential sequence: [1, r, m1, m2, ..., mL]
     bases = [g1, h_bases[0]] + h_bases[
         1 : len(m_scalars) + 1
-    ]  # 基点序列[g1, h0, h1, ..., hL]
+    ]  # Base points sequence: [g1, h0, h1, ..., hL]
 
     sum_pt = msm_g1(bases, scalars)
 
-    # 返回：A = sum_pt^denom_inv
+    # Returns: A = sum_pt^denom_inv
     return g1_mul(sum_pt, denom_inv)
 
 
 def sign(keypair: KeyPair, messages: list[str]):
     """
-    BBS+签名算法主函数
+    BBS+ Signature Algorithm Main Function
 
     Args:
-        keypair (KeyPair): 密钥对
-        messages (List[str]): 待签名的消息列表
+        keypair (KeyPair): Key pair
+        messages (List[str]): List of messages awaiting signature
 
     Returns:
-        Tuple: 签名σ = (A, r)
+        Tuple: Signature σ = (A, r)
     """
 
-    # 编码消息为标量
-    # 即：m_i = Hash(messages[i]) for i = 1, ..., L
+    # Encode message as scalar
+    # e.g., m_i = Hash(messages[i]) for i = 1, ..., L
     m_scalars = encode_attributes(messages)
 
-    # 生成随机盲化因子
+    # Generate random blinding factors
     r = rand_scalar()
 
-    # 计算签名分量
+    # Calculate signature components
     A = compute_A(keypair, r, keypair.h_bases, m_scalars)
 
     return (A, r)
@@ -71,29 +71,29 @@ def update_attributes(
     keypair: KeyPair, sig, messages_old: list[str], updates: dict[int, str]
 ):
     """
-    更新消息属性功能
+    Update message attribute function
 
-    在不重新生成随机数的情况下，更新部分消息属性
-    优势：保持签名的某些特征，支持增量更新
+    Update some message attributes without regenerating random numbers.
+    Advantages: Maintain certain characteristics of signatures and support incremental updates.
 
     Args:
-        keypair (KeyPair): 密钥对
-        sig (Tuple): 原始签名 (A_old, r)
-        messages_old (List[str]): 原始消息列表
-        updates (Dict[int, str]): 更新映射 {索引: 新值}
+        keypair (KeyPair): Key pair
+        sig (Tuple): Original signature (A_old, r)
+        messages_old (List[str]): List of original messages
+        updates (Dict[int, str]): Update mapping {index: new value}
 
     Returns:
-        Tuple: 新签名 (A_new, r)
+        Tuple: New signature (A_new, r)
     """
 
     A_old, r = sig
 
-    # 更新消息
+    # Update messages
     messages_new = messages_old[:]
     for idx, new_value in updates.items():
         messages_new[idx] = new_value
 
-    # 重新计算A
+    # Recalculate A
     m_scalars = encode_attributes(messages_new)
     A_new = compute_A(keypair, r, keypair.h_bases, m_scalars)
 
@@ -102,29 +102,29 @@ def update_attributes(
 
 def re_randomise(keypair: KeyPair, sig, messages: list[str]):
     """
-    BBS+签名随机化功能
+    BBS+ Signature Randomization Function
 
-    生成同一消息的不同签名，提供不可链接性
-    和上一个函数一样都是更新签名，上面那个是通过更新消息得到新签名，这个是更新r
-    即：给定σ = (A, r)，生成σ' = (A', r')使得两个签名无法关联
+    Generates different signatures for the same message, providing unlinkability.
+    Like the previous function, this function updates the signature. The previous function obtained a new signature by updating the message, while this function updates r.
+    That is, given σ = (A, r), generate σ' = (A', r') so that the two signatures cannot be linked.
 
     Args:
-        keypair (KeyPair): 密钥对
-        sig (Tuple[Point2D, int]): 原始签名
-        messages (List[str]): 消息列表
+        keypair (KeyPair): Key pair
+        sig (Tuple[Point2D, int]): Original signature
+        messages (List[str]): List of messages
 
     Returns:
-        Tuple[Point2D, int]: 随机化后的签名(A', r')
+        Tuple[Point2D, int]: Randomized signature (A', r')
     """
 
     A, r = sig
     m_scalars = encode_attributes(messages)
 
-    # 生成随机增量
+    # Generate random increments
     delta = rand_scalar()
     r_new = (r + delta) % curve_order
 
-    # 重新计算A
+    # Recalculate A
     A_new = compute_A(keypair, r_new, keypair.h_bases, m_scalars)
 
     return (A_new, r_new)
