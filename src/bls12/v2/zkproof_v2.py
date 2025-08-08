@@ -206,16 +206,6 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
 
     # 验证第二阶段：重建承诺值
 
-    """
-    # 计算隐藏部分信息的承诺值C1'
-    # 计算公式：C1' = h0^{zr} * (∏_{i∈H} hi^{z_{mi}}) * C1^(-c)
-    # 将zr代入可得：C1' = h0^{r' + c * r} * (∏_{i∈H} hi^(m' + c * mi)) * C1^(-c)
-    # 简化后可得：C1' = C1，则验证成功
-    rebuild_scalars = [zr] + [zm[i] for i in hidden_idx] + [(-c) % curve_order]
-    rebuild_bases = [h_bases[0]] + [h_bases[i + 1] for i in hidden_idx] + [C1]
-    C1_rebuilt = msm_g1(rebuild_bases, rebuild_scalars)
-    """
-
     # 构建披露部分消息的承诺
     # 公式：disclosed_commit = ∏_{i∈D} hi^{mi}
     if disclosed_messages:

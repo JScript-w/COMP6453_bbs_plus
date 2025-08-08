@@ -4,6 +4,8 @@ from .test_selective_disclosure import test_proof
 from .test_selective_disclosure_v2 import test_proof_v2
 from .test_update import test_update
 from .test_update_v2 import test_update_v2
+from .benchmark import begin_bench as bench
+from .benchmark_v2 import begin_bench_v2 as bench_v2
 
 __all__ = [
     "test_sign_verify",
@@ -12,4 +14,6 @@ __all__ = [
     "test_proof_v2",
     "test_update",
     "test_update_v2",
+    "bench",
+    "bench_v2",
 ]
