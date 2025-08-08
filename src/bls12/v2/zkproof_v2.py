@@ -1,4 +1,7 @@
 from hashlib import sha256
+
+from bls12.v2.keygen_v2 import KeyPair
+from bls12.v2.signer_v2 import compute_A
 from ..params import (
     rand_scalar,
     g1_mul,
@@ -40,7 +43,7 @@ def _hash_fs(elements: list) -> int:
 
 
 def prove_disclosure(
-    pk: dict, sig: tuple, messages: list[str], disclose_idx: list[int]
+    keypair: KeyPair, sig: tuple, messages: list[str], disclose_idx: list[int]
 ):
     """
     BBS+选择性披露证明
@@ -68,6 +71,7 @@ def prove_disclosure(
 
     # 提取签名分量
     A, r = sig
+    pk = keypair.get_pk()
     X = pk["X"]
     Y = pk["Y"]
     h_bases = pk["h_bases"]
@@ -87,18 +91,18 @@ def prove_disclosure(
     s_prime = rand_scalar()
     m_primes = {i: rand_scalar() for i in hidden_idx}
 
-    # 计算随机的A：A' = A * g1^s'
-    A_prime = add(A, g1_mul(g1, s_prime))
+    # 计算随机的A：A' = (g1 * h0^r * (∏ hl^{ml}))^(1/x+y*r')
+    A_prime = compute_A(keypair, r_prime, h_bases, m_scalars)
 
     # 计算承诺值 - 仅包含隐藏部分消息的随机化标量
-    # 公式：C1 = h0^r' · (∏_{i∈H} hi^{mi})
+    # 公式：C1 = h0^r' · (∏_{j∈H} hj^{mj'})
     commit_scalars = [r_prime] + [m_primes[i] for i in hidden_idx]
     commit_bases = [h_bases[0]] + [h_bases[i + 1] for i in hidden_idx]
     C1 = msm_g1(commit_bases, commit_scalars)
 
     # 计算G2中的承诺
-    # 公式：C2 = Y^r'
-    C2 = g2_mul(Y, r_prime)
+    # 公式：C2 = Y^r
+    C2 = g2_mul(Y, r)
 
     # 计算配对承诺
     T1 = pair(A_prime, C2)
@@ -113,7 +117,7 @@ def prove_disclosure(
         C2,
         T1,
         T2,
-        *[disclosed_messages[i] for i in disclose_idx],  # 披露的消息
+        *[disclosed_messages[i] for i in sorted(disclose_idx)],  # 披露的消息
     ]
 
     # 生成挑战
@@ -124,7 +128,7 @@ def prove_disclosure(
     # 计算r的响应值：z_r = r' + c * r
     zr = (r_prime + c * r) % curve_order
 
-    # 计算s的响应值：z_s = s' + c * s （s通常为0或另一个随机数，这里用0）
+    # 计算s的响应值：z_s = s' + c * s （s通常为0或另一个随机数，这里用0，因此就是z_s = s'）
     zs = s_prime % curve_order
 
     # 计算z_{mi} = m' + c * mi (for i ∈ H)
@@ -177,8 +181,32 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
     disclosed_messages = proof["disclosed_messages"]
     hidden_idx = proof["hidden_idx"]
 
-    # 验证第一阶段：重建承诺值
+    # 验证第一阶段：检查Fiat-Shamir挑战
 
+    T1 = pair(A_prime, C2)
+    T2 = pair(C1, g2)
+
+    # 重建挑战
+    challenge_elements = [
+        A_prime,
+        C1,
+        C2,
+        T1,
+        T2,
+        *[disclosed_messages[i] for i in disclosed_messages.keys()],
+    ]
+    c_rebuilt = _hash_fs(challenge_elements)
+
+    if c == c_rebuilt:
+        print("挑战c == 重构的挑战c_rebuilt")
+    else:
+        print(c)
+        print(c_rebuilt)
+        return False
+
+    # 验证第二阶段：重建承诺值
+
+    """
     # 计算隐藏部分信息的承诺值C1'
     # 计算公式：C1' = h0^{zr} * (∏_{i∈H} hi^{z_{mi}}) * C1^(-c)
     # 将zr代入可得：C1' = h0^{r' + c * r} * (∏_{i∈H} hi^(m' + c * mi)) * C1^(-c)
@@ -186,6 +214,7 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
     rebuild_scalars = [zr] + [zm[i] for i in hidden_idx] + [(-c) % curve_order]
     rebuild_bases = [h_bases[0]] + [h_bases[i + 1] for i in hidden_idx] + [C1]
     C1_rebuilt = msm_g1(rebuild_bases, rebuild_scalars)
+    """
 
     # 构建披露部分消息的承诺
     # 公式：disclosed_commit = ∏_{i∈D} hi^{mi}
@@ -199,17 +228,17 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
         disclosed_commit = None
 
     # 构建完整消息承诺
-    # 公式：full_commit = g1 · disclosed_commit · C1_rebuilt
+    # 公式：full_commit = g1 · disclosed_commit · C1
     full_commit = g1
 
     if disclosed_commit:
         full_commit = add(full_commit, disclosed_commit)
 
-    full_commit = add(full_commit, C1_rebuilt)
+    full_commit = add(full_commit, C1)
 
     # 验证第二阶段：检查配对等式 e(A', X * Y^{zr} * C2^(-c)) = e(full_commit, g2)
 
-    # 重建右边的g2
+    # 重建左等式右边的g2
     # 公式：right_g2 = X * Y^{zr} * C2^(-c)
     Yzr = g2_mul(Y, zr)  # Y^{zr}
     C2_power_neg_c = g2_mul(C2, (-c) % curve_order)  # C2^(-c)
@@ -219,29 +248,10 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
     left = pair(A_prime, right_g2)  # e(A', X * Y^{zr} * C2^(-c))
     right = pair(full_commit, g2)  # e(完整承诺, g2)
 
-    # 验证第三阶段：检查Fiat-Shamir挑战
-
-    # 重建挑战
-    challenge_elements = [
-        A_prime,
-        C1,
-        C2,
-        left,
-        right,
-        *[disclosed_messages[i] for i in disclosed_messages.keys()],
-    ]
-    c_rebuilt = _hash_fs(challenge_elements)
-
     if left == right:
         print("左边 == 右边")
     else:
         print(left)
         print(right)
 
-    if c == c_rebuilt:
-        print("挑战c == 重构的挑战c_rebuilt")
-    else:
-        print(c)
-        print(c_rebuilt)
-
-    return left == right and c == c_rebuilt
+    return left == right

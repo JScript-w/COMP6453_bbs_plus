@@ -3,15 +3,13 @@ from ..params import curve_order, g1, msm_g1, g1_mul, rand_scalar
 from .utils_v2 import encode_attributes
 
 
-def _compute_A(x, y, r, h_bases, m_scalars):
+def compute_A(keypair: KeyPair, r, h_bases, m_scalars):
     """
     计算BBS+签名的核心分量A
 
     具体公式：A = (g1 * h0^r * ∏_{i=1}^L h_i^m_i)^(1/(x + y * r))
 
     Args:
-        x (int): 私钥分量1
-        y (int): 私钥分量2
         r (): 随机盲化因子
         h_bases (List[Point2D]): 基点序列[h0, h1, h2, ..., hL]
         m_scalars (int): 消息标量[m1, m2, ..., mL]
@@ -19,6 +17,12 @@ def _compute_A(x, y, r, h_bases, m_scalars):
     Returns:
         Point2D: A ∈ G1
     """
+
+    # 提取私钥
+    # x (int): 私钥分量1
+    # y (int): 私钥分量2
+    x = keypair.x
+    y = keypair.y
 
     # 计算分母的模逆 1/(x + y*r)
     # 即：denom = (x + y*r) mod p，denom_inv = denom^(-1) mod p
@@ -58,7 +62,7 @@ def sign(keypair: KeyPair, messages: list[str]):
     r = rand_scalar()
 
     # 计算签名分量
-    A = _compute_A(keypair.x, keypair.y, r, keypair.h_bases, m_scalars)
+    A = compute_A(keypair, r, keypair.h_bases, m_scalars)
 
     return (A, r)
 
@@ -91,7 +95,7 @@ def update_attributes(
 
     # 重新计算A
     m_scalars = encode_attributes(messages_new)
-    A_new = _compute_A(keypair.x, keypair.y, r, keypair.h_bases, m_scalars)
+    A_new = compute_A(keypair, r, keypair.h_bases, m_scalars)
 
     return (A_new, r)
 
@@ -121,6 +125,6 @@ def re_randomise(keypair: KeyPair, sig, messages: list[str]):
     r_new = (r + delta) % curve_order
 
     # 重新计算A
-    A_new = _compute_A(keypair.x, keypair.y, r_new, keypair.h_bases, m_scalars)
+    A_new = compute_A(keypair, r_new, keypair.h_bases, m_scalars)
 
     return (A_new, r_new)

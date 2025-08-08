@@ -32,8 +32,11 @@ src/bn254/v1/utils.py
 src/bn254/v1/verifier.py
 src/bn254/v1/zkproof.py
 tests/test_basic.py
+tests/test_basic_bn254.py
 tests/test_basic_v2.py
 tests/test_selective_disclosure.py
+tests/test_selective_disclosure_bn254.py
 tests/test_selective_disclosure_v2.py
 tests/test_update.py
+tests/test_update_bn254.py
 tests/test_update_v2.py

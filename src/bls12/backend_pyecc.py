@@ -99,39 +99,3 @@ def pair(P, Q):
 
 
 ecc_add = add
-# Import curve parameters and group operations
-# curve_order: the order of the elliptic curve group
-# G1, G2: generators of the groups G1 and G2 respectively
-# add: elliptic curve point addition
-# multiply: elliptic curve scalar multiplication
-
-# Import pairing functions
-# pairing: bilinear pairing function e: G1 × G2 → GT
-# final_exponentiate: final exponentiation step in pairing calculation
-
-# Import cryptographically secure random number generator
-
-# Scalars
-
-# Generate a cryptographically secure random scalar in the range [1, curve_order-1]
-
-# Group helpers
-
-# Scalar multiplication on G1 group
-# Inputs: point P in G1, scalar k
-# Returns: point k*P on G1
-
-# Scalar multiplication on G2 group
-# Inputs: point Q in G2, scalar k
-# Returns: point k*Q on G2
-
-# Multi-scalar multiplication on G1
-# Efficiently compute the sum of multiple scalar multiplications ∑(P_i * k_i)
-# Inputs: list of G1 points bases, list of scalars scalars
-# Returns: the combined point in G1
-
-# Bilinear pairing operation
-# Inputs: P in G1, Q in G2
-# Returns: element in GT after applying final exponentiation
-
-# Alias for point addition function

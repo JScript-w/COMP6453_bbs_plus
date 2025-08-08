@@ -30,11 +30,3 @@ def hash_to_g1(label: bytes):
 
 def encode_attributes(attrs: list[str]) -> list[int]:
     return [hash_to_scalar(a.encode()) for a in attrs]
-    # Hash arbitrary byte string to scalar in Zp
-# Ensures one-wayness and collision resistance using SHA-256
-# Result must be non-zero and less than curve order
-
-# Map label to fixed G1 point using hash-to-scalar
-
-# Encode list of string attributes into scalars
-
