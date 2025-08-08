@@ -72,7 +72,6 @@ def prove_disclosure(
     # 提取签名分量
     A, r = sig
     pk = keypair.get_pk()
-    X = pk["X"]
     Y = pk["Y"]
     h_bases = pk["h_bases"]
 
@@ -128,9 +127,6 @@ def prove_disclosure(
     # 计算r的响应值：z_r = r' + c * r
     zr = (r_prime + c * r) % curve_order
 
-    # 计算s的响应值：z_s = s' + c * s （s通常为0或另一个随机数，这里用0，因此就是z_s = s'）
-    zs = s_prime % curve_order
-
     # 计算z_{mi} = m' + c * mi (for i ∈ H)
     zm = {i: (m_primes[i] + c * m_scalars[i]) % curve_order for i in hidden_idx}
 
@@ -140,7 +136,6 @@ def prove_disclosure(
         "C2": C2,
         "c": c,
         "zr": zr,
-        "zs": zs,
         "zm": zm,
         "disclosed_messages": disclosed_messages,
         "hidden_idx": hidden_idx,
@@ -176,7 +171,6 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
     C2 = proof["C2"]
     c = proof["c"]
     zr = proof["zr"]
-    zs = proof["zs"]
     zm = proof["zm"]
     disclosed_messages = proof["disclosed_messages"]
     hidden_idx = proof["hidden_idx"]
