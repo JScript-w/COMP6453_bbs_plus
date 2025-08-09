@@ -19,11 +19,11 @@ class KeyPair:
     Features: Uses a dual private key structure (x, y), which is more secure than a single private key.
     """
 
-    x: int  # 私钥分量1：随机数 x ∈ Zp
-    y: int  # 私钥分量2: 随机数 y ∈ Zp
-    X: Point2D  # 公钥分量1: X = g2^x ∈ G2
-    Y: Point2D  # 公钥分量2：Y = g2^y ∈ G2
-    h_bases: list  # 消息基点：[h0, h1, h2, ...] ∈ G1^(L+1)
+    x: int  # Private key component 1: Random number x ∈ Zp
+    y: int  # Private key component 2: Random number y ∈ Zp
+    X: Point2D  # Public key component 1: X = g2^x ∈ G2
+    Y: Point2D  # Public key component 2: Y = g2^y ∈ G2
+    h_bases: list  # Message base points: [h0, h1, h2, ...] ∈ G1^(L+1)
 
     @classmethod
     def generate(cls, max_attributes: int) -> "KeyPair":
@@ -31,10 +31,10 @@ class KeyPair:
         Generate key pair
 
         Args:
-            max_attributes (int): 支持的最大属性数量
+            max_attributes (int): Maximum number of supported attributes
 
         Returns:
-            KeyPair: 返回类实例
+            KeyPair: Class instance
         """
 
         # Generate double keys
@@ -53,8 +53,13 @@ class KeyPair:
 
         # h1, h2, ..., hL: Base points for each message attribute
         for i in range(max_attributes):
-            label = f"BBS_PLUS_H{i+1}".encode()  # 为每个属性生成唯一标签
-            h_bases.append(hash_to_g1(label))  # 哈希映射到G1群得到独立基点
+            label = (
+                f"BBS_PLUS_H{i+1}".encode()
+            )  # Generate unique tags for each attribute
+
+            h_bases.append(
+                hash_to_g1(label)
+            )  # Hash mapping to the G1 group yields independent reference points
 
         return cls(x, y, X, Y, h_bases)
 

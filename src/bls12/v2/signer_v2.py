@@ -3,7 +3,7 @@ from ..params import curve_order, g1, msm_g1, g1_mul, rand_scalar
 from .utils_v2 import encode_attributes
 
 
-def compute_A(keypair: KeyPair, r, h_bases, m_scalars):
+def compute_A(keypair, r, h_bases, m_scalars):
     """
     Calculate the core component A of BBS+ signature
 
@@ -12,13 +12,12 @@ def compute_A(keypair: KeyPair, r, h_bases, m_scalars):
     Args:
         r (int): Randomization factor
         h_bases (List[Point2D]): Base sequence[h0, h1, h2, ..., hL]
-        m_scalars (int): 消息标量[m1, m2, ..., mL]
+        m_scalars (int): message scalars[m1, m2, ..., mL]
 
     Returns:
         Point2D: A ∈ G1
     """
 
-    # Extract private key
     # x (int): Private key component 1
     # y (int): Private key component 2
     x = keypair.x

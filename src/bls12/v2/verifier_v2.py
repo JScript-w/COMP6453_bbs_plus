@@ -1,5 +1,5 @@
 """
-BBS+验证器
+BBS+ Verifier
 
 Version: v0.1
 """
@@ -10,52 +10,52 @@ from .utils_v2 import encode_attributes
 
 def verify(pk: dict, sig: tuple, messages: list[str]):
     """
-    BBS+签名验证算法
+    BBS+ Signature-Verifizier algorithmus
 
-    计算公式：e(A, X · Y^r) = e(g1 · h0^r · ∏_{i=1}^{L}h_i^m_i, g2)
+    Formula: e(A, X · Y^r) = e(g1 · h0^r · ∏_{i=1}^{L}h_i^m_i, g2)
 
-    验证原理:
-    已知 e(aP, bQ) = e(P,Q)^{ab}，因此可得
-    1. 左边: e(A, X · Y^r) = e(A, g2^x · g2^(y·r)) = e(A, g2^(x + y·r))
-    2. 右边: e(g1 · h0^r · ∏h_i^m_i, g2)
-    3. 由于A = (g1 · h0^r · ∏h_i^m_i)^(1/(x + y·r))
-    4. 所以左边 = e((...)^(1/(x + y·r)), g2^(x + y·r)) = e(..., g2) = 右边
+    Principle:
+    Given e(aP, bQ) = e(P,Q)^{ab}, we have:
+    1. Left: e(A, X · Y^r) = e(A, g2^x · g2^(y·r)) = e(A, g2^(x + y·r))
+    2. Right: e(g1 · h0^r · ∏h_i^m_i, g2)
+    3. Since A = (g1 · h0^r · ∏h_i^m_i)^(1/(x + y·r))
+    4. Therefore, left = e((...)^(1/(x + y·r)), g2^(x + y·r)) = e(..., g2) = Right
 
     Args:
-        pk (Dict): 公钥(public key)字典 {X, Y, h_bases}
-        sig (Tuple[Point2D, int]): 签名 (A, r)
-        messages (List[str]): 消息列表
+        pk (Dict): public key (dict {X, Y, h_bases})
+        sig (Tuple[Point2D, int]): Signature (A, r)
+        messages (List[str]): List of messages
 
     Returns:
-        bool: 签名是否有效
+        bool: Is the signature valid
     """
 
-    # 提取签名分量
+    # Extract signature components
     A, r = sig
 
-    # 提取公钥分量
+    # Extract public key components
     X = pk["X"]
     Y = pk["Y"]
     h_bases = pk["h_bases"]
 
-    # 编码消息为标量，即计算消息的哈希值
+    # Encode the message as a scalar, i.e., calculate the hash value of the message
     # mi = Hash(messages[i])
     m_scalars = encode_attributes(messages)
 
-    # 构建消息承诺
-    # 即：msg_commit = g1 · h0^r · ∏_{i=1}^{L} h_i^m_i
+    # Build message commitment
+    # i.e., msg_commit = g1 · h0^r · ∏_{i=1}^{L} h_i^m_i
     scalars = [1, r] + m_scalars  # [1, r, m1, m2, ..., mL]
     bases = [g1, h_bases[0]] + h_bases[1 : len(m_scalars) + 1]  # [g1, h0, h1, ..., hL]
     msg_commit = msm_g1(bases, scalars)
 
-    # 构建验证等式左边
-    # 即：e(A, X · Y^r)
+    # Construct left side of the equation
+    # i.e., e(A, X · Y^r)
     Yr = g2_mul(Y, r)  # Y^r = g2^(y·r)
     left_g2 = add(X, Yr)  # X · Y^r = g2^x · g2^(y·r) = g2^(x + y·r)
     left = pair(A, left_g2)  # e(A, X · Y^r) -> e(A, g2^(x + y·r))
 
-    # 构建验证等式右边
-    # 即：e(g1 · h0^r · ∏hi^{mi}, g2)
+    # Construct right side of the equation
+    # i.e., e(g1 · h0^r · ∏hi^{mi}, g2)
     right = pair(msg_commit, g2)
 
     return left == right

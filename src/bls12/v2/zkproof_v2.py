@@ -38,7 +38,7 @@ def _hash_fs(elements: list) -> int:
         else:
             data += str(e).encode()  # Convert elements to strings and then to bytes
 
-    # 将数据哈希到标量域
+    # Hash data to scalar domain
     return int.from_bytes(sha256(data).digest(), "big") % curve_order
 
 
@@ -46,40 +46,38 @@ def prove_disclosure(
     keypair: KeyPair, sig: tuple, messages: list[str], disclose_idx: list[int]
 ):
     """
-    BBS+选择性披露证明
+    Selective disclosure certification
 
-    证明拥有有效签名，同时只披露部分消息
-
-    具体流程 (Sigma协议)：
-    1. 将消息分解为披露部分和隐藏部分:
-        - {mi}, 其中i ∈ D (D为披露集合)
-        - {mj}, 其中j ∈ H (H为隐藏集合)
-    2. Prover构造一个承诺值：C = g₁ · h₀ʳ · (∏_{i∈D} hᵢ^{mi})ⁱ · (∏_{j∈H} hⱼ^{mj})
-    3. Verifier知道披露的消息，因此他可以计算：C_Known = g₁ · (∏_{i∈D} hᵢ^{mi})
-    4. Prover需要计算：C_Hidden = C / C_known = h₀ʳ · (∏_{j∈H} hⱼ^{mj})
-    5. Prover然后证明：e(A, X · Yʳ) = e(C_known · C_hidden, g₂)
+    Specific process (Sigma protocol):
+    1. Break down the message into a disclosure part and a hidden part:
+        - {mi}, where i ∈ D (D is the disclosure set)
+        - {mj}, where j ∈ H (H is the hidden set)
+    2. Prover construct a commitment value: C = g₁ · h₀ʳ · (∏_{i∈D} hᵢ^{mi})ⁱ · (∏_{j∈H} hⱼ^{mj})
+    3. Verifier knows the disclosed messages, then he can calculate: C_Known = g₁ · (∏_{i∈D} hᵢ^{mi})
+    4. Prover needs to calculate: C_Hidden = C / C_known = h₀ʳ · (∏_{j∈H} hⱼ^{mj})
+    5. Verifier check: e(A, X · Yʳ) = e(C_known · C_hidden, g₂)
 
     Args:
-        pk (Dict): 公钥
-        sig (Tuple): 签名(A, r)
-        messages (List[str]): 完整消息列表
-        disclose_idx (List[int]): 要披露的消息索引
+        pk (Dict): Public key
+        sig (Tuple): Signature (A, r)
+        messages (List[str]): List of all messages
+        disclose_idx (List[int]): Index of message to be disclosed
 
     Returns:
-        Tuple: 完整的零知识证明
+        Tuple: Proof
     """
 
-    # 提取签名分量
+    # Extract components of signature
     A, r = sig
     pk = keypair.get_pk()
     Y = pk["Y"]
     h_bases = pk["h_bases"]
 
-    # 编码所有消息
+    # Encode all messages
     m_scalars = encode_attributes(messages)  # [m1, m2, ..., mL]
 
-    # 分离披露和隐藏消息
-    # D = {披露消息}, H = {隐藏消息}
+    # Separate disclosure and hidden messages
+    # D = {Disclosed messages}, H = {Hidden messages}
     disclosed_messages = {i: m_scalars[i] for i in disclose_idx}
     hidden_idx = [i for i in range(len(messages)) if i not in disclose_idx]
 
@@ -87,11 +85,7 @@ def prove_disclosure(
 
     # 为所有隐藏变量生成随机值
     r_prime = rand_scalar()
-    s_prime = rand_scalar()
     m_primes = {i: rand_scalar() for i in hidden_idx}
-
-    # 计算随机的A：A' = (g1 * h0^r * (∏ hl^{ml}))^(1/x+y*r')
-    A_prime = compute_A(keypair, r_prime, h_bases, m_scalars)
 
     # 计算承诺值 - 仅包含隐藏部分消息的随机化标量
     # 公式：C1 = h0^r' · (∏_{j∈H} hj^{mj'})
@@ -100,18 +94,18 @@ def prove_disclosure(
     C1 = msm_g1(commit_bases, commit_scalars)
 
     # 计算G2中的承诺
-    # 公式：C2 = Y^r
-    C2 = g2_mul(Y, r)
+    # 公式：C2 = Y^r'
+    C2 = g2_mul(Y, r_prime)
 
     # 计算配对承诺
-    T1 = pair(A_prime, C2)
+    T1 = pair(A, C2)
     T2 = pair(C1, g2)
 
     # Sigma协议第二阶段：挑战
 
     # 构建生成挑战的输入信息
     challenge_elements = [
-        A_prime,
+        A,
         C1,
         C2,
         T1,
@@ -122,6 +116,9 @@ def prove_disclosure(
     # 生成挑战
     c = _hash_fs(challenge_elements)
 
+    # 计算随机的A：A' = (g1 * h0^r * (∏ hl^{ml}))^(1/x+y*r')
+    A_prime = compute_A(keypair, r_prime, h_bases, m_scalars)
+
     # Sigma协议第三阶段：响应
 
     # 计算r的响应值：z_r = r' + c * r
@@ -130,8 +127,12 @@ def prove_disclosure(
     # 计算z_{mi} = m' + c * mi (for i ∈ H)
     zm = {i: (m_primes[i] + c * m_scalars[i]) % curve_order for i in hidden_idx}
 
+    hidden_scalars = [r] + [m_scalars[i] for i in hidden_idx]
+    hidden_bases = [h_bases[0]] + [h_bases[i + 1] for i in hidden_idx]
+    hidden_commit = g1_mul(msm_g1(hidden_bases, hidden_scalars), c)
+
     return {
-        "A_prime": A_prime,
+        "A": A,
         "C1": C1,
         "C2": C2,
         "c": c,
@@ -139,6 +140,7 @@ def prove_disclosure(
         "zm": zm,
         "disclosed_messages": disclosed_messages,
         "hidden_idx": hidden_idx,
+        "hidden_commit": hidden_commit,
     }
 
 
@@ -166,7 +168,7 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
     h_bases = pk["h_bases"]
 
     # 提取证明组件
-    A_prime = proof["A_prime"]
+    A = proof["A"]
     C1 = proof["C1"]
     C2 = proof["C2"]
     c = proof["c"]
@@ -177,12 +179,12 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
 
     # 验证第一阶段：检查Fiat-Shamir挑战
 
-    T1 = pair(A_prime, C2)
+    T1 = pair(A, C2)
     T2 = pair(C1, g2)
 
     # 重建挑战
     challenge_elements = [
-        A_prime,
+        A,
         C1,
         C2,
         T1,
@@ -208,30 +210,35 @@ def verify_disclosure(pk: dict, proof: dict, total_attrs: int):
         disclosed_commit = None
 
     # 构建完整消息承诺
-    # 公式：full_commit = g1 · disclosed_commit · C1
+    # 公式：full_commit = g1 · disclosed_commit · C1'^(1/c)
+    # C1' = h0^{zr} * (∏_{j∈H} hj^{z_{mj}}) * C1^(-1)
     full_commit = g1
 
     if disclosed_commit:
         full_commit = add(full_commit, disclosed_commit)
 
-    full_commit = add(full_commit, C1)
+    full_commit = g1_mul(full_commit, c)
 
-    # 验证第二阶段：检查配对等式 e(A', X * Y^{zr} * C2^(-c)) = e(full_commit, g2)
+    scalars = [zr] + [zmj for zmj in zm] + [-1]
+    bases = [h_bases[0]] + [h_bases[j + 1] for j in hidden_idx] + [C1]
+    C1_prime = msm_g1(bases, scalars)  # h0^{zr} * (∏_{j∈H} hj^{z_{mj}}) * C1^(-1)
+    print(C1_prime)
+
+    print("========================================================")
+    print(proof["hidden_commit"])
+    full_commit = add(full_commit, C1_prime)
+
+    # 验证第二阶段：检查配对等式 e(A^c, X * Y^{zr} * C2^(-1)) = e(full_commit, g2)
 
     # 重建左等式右边的g2
-    # 公式：right_g2 = X * Y^{zr} * C2^(-c)
+    # 公式：right_g2 = X * Y^{zr} * C2^(-1)
     Yzr = g2_mul(Y, zr)  # Y^{zr}
-    C2_power_neg_c = g2_mul(C2, (-c) % curve_order)  # C2^(-c)
-    right_g2 = add(add(X, Yzr), C2_power_neg_c)
+    C2_power_neg_c = g2_mul(C2, -1)  # C2^(-1)
+    Ycr = add(Yzr, C2_power_neg_c)
+    right_g2 = add(X, Ycr)
 
     # 分别计算等式两边的值
-    left = pair(A_prime, right_g2)  # e(A', X * Y^{zr} * C2^(-c))
+    left = pair(g1_mul(A, c), right_g2)  # e(A^c, X * Y^{zr} * C2^(-1))
     right = pair(full_commit, g2)  # e(完整承诺, g2)
-
-    if left == right:
-        print("左边 == 右边")
-    else:
-        print(left)
-        print(right)
 
     return left == right

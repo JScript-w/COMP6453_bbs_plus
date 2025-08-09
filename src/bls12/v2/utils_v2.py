@@ -31,7 +31,7 @@ def hash_to_scalar(data: bytes) -> int:
 
 def hash_to_g1(label: bytes):
     """
-    Secure hash-to-curve mapping to G1 groups using RFC standard hash-to-curve algorithms
+    Mapping to G1 groups
 
     Args:
         label (bytes): Input label
