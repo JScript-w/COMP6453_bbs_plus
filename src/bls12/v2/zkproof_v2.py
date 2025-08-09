@@ -1,7 +1,7 @@
 from hashlib import sha256
 
 from bls12.v2.keygen_v2 import KeyPair
-from bls12.v2.signer_v2 import compute_A
+from bls12.v2.signer_v2 import _compute_A
 from ..params import (
     rand_scalar,
     g1_mul,
@@ -116,8 +116,8 @@ def prove_disclosure(
     # 生成挑战
     c = _hash_fs(challenge_elements)
 
-    # 计算随机的A：A' = (g1 * h0^r * (∏ hl^{ml}))^(1/x+y*r')
-    A_prime = compute_A(keypair, r_prime, h_bases, m_scalars)
+    # 计算随机的A：A' = A * g1^t
+    # A_prime = add(A, g1_mul(g1, t))
 
     # Sigma协议第三阶段：响应
 
