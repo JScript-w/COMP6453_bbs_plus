@@ -65,26 +65,21 @@ def prove_disclosure(
 
     ========== 数学原理 ==========
 
-    1. 签名随机化阶段:
-       - 选择随机数 t ← Zp
-       - 计算 A' = A^t, r' = r·t
-       - 这确保每次生成的证明不可链接
-
-    2. Sigma协议承诺阶段:
+    1. Sigma协议承诺阶段:
        - 为隐藏的签名组件生成随机承诺
-       - r̃ ← Zp (对r'的承诺)
+       - r̃ ← Zp (对r的承诺)
        - m̃_j ← Zp, ∀j ∈ H (对隐藏消息的承诺)
 
-    3. 承诺值计算:
+    2. 承诺值计算:
        - T₁ = h₀^r̃ · ∏_{j∈H} h_j^m̃_j (G1中的承诺)
        - T₂ = Y^r̃ (G2中的承诺)
-       - T₃ = e(A', T₂) (配对承诺，用于验证)
+       - T₃ = e(A, T₂) (配对承诺，用于验证)
 
-    4. Fiat-Shamir挑战生成:
+    3. Fiat-Shamir挑战生成:
        - c = Hash(A', T₁, T₂, T₃, {m_i}_{i∈D})
 
-    5. Schnorr响应计算:
-       - ẑ_r = r̃ + c·r' (对r'的响应)
+    4. Schnorr响应计算:
+       - ẑ_r = r̃ + c·r (对r的响应)
        - ẑ_{m_j} = m̃_j + c·m_j, ∀j ∈ H (对隐藏消息的响应)
 
     Args:
@@ -111,12 +106,11 @@ def prove_disclosure(
     # 分离披露集D和隐藏集H
     hidden_indices = [i for i in range(len(messages)) if i not in disclosed_indices]
     disclosed_msgs = {i: messages[i] for i in disclosed_indices}
-    disclosed_scalars = {i: m_scalars[i] for i in disclosed_indices}
     hidden_scalars = {i: m_scalars[i] for i in hidden_indices}
 
     # ===== 步骤2: Sigma协议承诺阶段 =====
     # 为所有隐藏值生成随机承诺
-    r_tilde = rand_scalar()  # 对r'的承诺
+    r_tilde = rand_scalar()  # 对r的承诺
     m_tildes = {i: rand_scalar() for i in hidden_indices}  # 对隐藏消息的承诺
 
     # 计算承诺T₁ = h₀^r̃ · ∏_{j∈H} h_j^m̃_j
@@ -146,7 +140,7 @@ def prove_disclosure(
 
     # ===== 步骤4: Schnorr响应计算 =====
     # 计算响应值（证明者知识的零知识证明）
-    z_r = (r_tilde + c * r) % curve_order  # ẑ_r = r̃ + c·r'
+    z_r = (r_tilde + c * r) % curve_order  # ẑ_r = r̃ + c·r
     z_m = {
         i: (m_tildes[i] + c * hidden_scalars[i]) % curve_order for i in hidden_indices
     }  # ẑ_{m_j} = m̃_j + c·m_j
@@ -182,10 +176,10 @@ def verify_disclosure(pk: Dict, proof: Dict) -> bool:
        T₁ ?= h₀^ẑ_r · ∏_{j∈H} h_j^ẑ_{m_j} · T₁^{-c}
 
     2. 配对方程验证:
-       e(A'^c, X · Y^ẑ_r · T₂^{-1}) ?= e(g₁^c · ∏_{i∈D} h_i^{c·m_i} · T₁, g₂)
+       e(A^c, X · Y^ẑ_r · T₂^{-1}) ?= e(g₁^c · ∏_{i∈D} h_i^{c·m_i} · T₁, g₂)
 
     3. 挑战值验证:
-       c ?= Hash(A', T₁, T₂, T₃, {m_i}_{i∈D})
+       c ?= Hash(A, T₁, T₂, T₃, {m_i}_{i∈D})
 
     数学原理:
     - 利用Schnorr协议的完备性

@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "7c593444bcce5bc6",
@@ -169,5 +170,8 @@
     }
   },
   "active": "2b12294e89bd24c7",
-  "lastOpenFiles": []
+  "lastOpenFiles": [
+    "src/bls12/v2/README.md~",
+    "src/bls12/v2/zkproof_v2.py~"
+  ]
 }
