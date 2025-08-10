@@ -12,7 +12,7 @@ This project is a Python implementation of the BBS+ (Boneh-Boyen-Shacham Plus) s
 - ✅ **Signature randomization**: Supports re-randomization of signatures, providing unlinkability
 - ✅ **Dynamic updates**: Supports updating message attributes without regenerating random numbers
 
-## 🏗️ # Module export interface
+## 🏗️ Module export interface
 
 ```
 bbs_plus/
@@ -233,7 +233,3 @@ Where：
 
 1. [decentralized-identity/bbs-signature: The BBS Signature Scheme](https://github.com/decentralized-identity/bbs-signature)
 2. [mattrglobal/bbs-signatures: An implementation of BBS+ signatures for node and browser environments](https://github.com/mattrglobal/bbs-signatures)
-
-## Contributing
-
-Issues and pull requests are welcome.
