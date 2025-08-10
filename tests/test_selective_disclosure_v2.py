@@ -5,8 +5,8 @@ def test_proof_v2():
     kp = KeyPair.generate(5)
     msgs = ["x", "y", "z"]
     sig = sign(kp, msgs)
-    proof = prove_disclosure(kp, sig, msgs, disclose_idx=[1])
-    if verify_disclosure(kp.get_pk(), proof, total_attrs=len(msgs)):
+    proof = prove_disclosure(kp.get_pk(), sig, msgs, disclosed_indices=[1])
+    if verify_disclosure(kp.get_pk(), proof):
         print("Success!")
     else:
         print("Failed!")
