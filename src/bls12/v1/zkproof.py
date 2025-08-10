@@ -1,5 +1,6 @@
 from hashlib import sha256
-from ..params import rand_scalar, g1_mul, g2_mul, add, g1, g2, pair, curve_order
+
+from ..params import rand_scalar, g1_mul, g2_mul, msm_g1, add, g1, g2, pair, curve_order
 from .utils import encode_attributes
 
 
@@ -50,11 +51,16 @@ def prove_disclosure(pk, sig, messages, disclose_idx):
     c = _hash_fs(transcript)
     s_vec = {i: (r_vec[i] + c * m_scalars[i]) % curve_order for i in hidden_idx}
 
+    commit_scalars = [r_vec[i] for i in hidden_idx]
+    commit_bases = [g1_mul(g1, i + 2) for i in hidden_idx]
+    commit = msm_g1(commit_bases, commit_scalars)
+
     return {
         "A": A,
         "e": e,
         "c": c,
         "s": s_vec,
+        "commit": commit,
         "disclosed": disclosed,
     }
 
@@ -81,25 +87,27 @@ def verify_disclosure(pk, proof, total_attrs):
     A, e = proof["A"], proof["e"]
     c = proof["c"]
     s_vec = proof["s"]
+    commit = proof["commit"]
     disclosed = proof["disclosed"]
 
     h_bases = [g1_mul(g1, i + 2) for i in range(total_attrs)]
 
-    msg_commit = g1
-    for i in range(total_attrs):
-        if i in disclosed:
-            term = g1_mul(h_bases[i], disclosed[i])
-        else:
-            #   h_i^{s_i} · h_i^{-c·m_i}  =  h_i^{r_i + c·m_i} · h_i^{-c·m_i}
-            #                       =  h_i^{r_i} · h_i^{c(m_i-m_i)}
-            #                       → 消掉 c·m_i，留下 h_i^{r_i}
-            term = add(
-                g1_mul(h_bases[i], s_vec[i]),
-                g1_mul(h_bases[i], (-c) % curve_order),
-            )
-        msg_commit = add(msg_commit, term)
+    msg_commit = g1_mul(g1, c)
+    disclosed_scalars = [
+        c * disclosed[i] % curve_order for i in sorted(disclosed.keys())
+    ]
+    disclosed_bases = [h_bases[i] for i in sorted(disclosed.keys())]
 
-    lhs = pair(A, add(pk, g2_mul(g2, e)))
+    msg_commit = add(msg_commit, msm_g1(disclosed_bases, disclosed_scalars))
+
+    hidden_scalars = [s for s in s_vec.values()]
+    hidden_bases = [h_bases[i] for i in s_vec.keys()]
+    msg_commit = add(
+        msg_commit,
+        add(msm_g1(hidden_bases, hidden_scalars), g1_mul(commit, -1)),
+    )
+
+    lhs = pair(g1_mul(A, c), add(pk, g2_mul(g2, e)))
     rhs = pair(msg_commit, g2)
 
     transcript = b"".join(
@@ -107,4 +115,9 @@ def verify_disclosure(pk, proof, total_attrs):
         + [int(disclosed[i]).to_bytes(32, "big") for i in sorted(disclosed)]
         + [bytes(str(pk), "utf8")]
     )
-    return lhs == rhs and c == _hash_fs(transcript)
+
+    if c != _hash_fs(transcript):
+        print("挑战重构失败")
+        return False
+
+    return lhs == rhs

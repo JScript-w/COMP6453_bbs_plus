@@ -24,7 +24,7 @@ def main():
 
     elif test_type == 2:
         start = time.perf_counter()
-        # tests.test_selective_disclosure.test_proof()
+        tests.test_selective_disclosure.test_proof()
         end = time.perf_counter()
         print(f"Time for selective disclosure test (bls12_v1): {end - start}")
 
