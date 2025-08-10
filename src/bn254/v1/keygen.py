@@ -12,3 +12,10 @@ class KeyPair:
         sk = rand_scalar()
         pk = g2_mul(g2, sk)
         return cls(sk, pk)
+
+def keygen():
+    """模块级 keygen：给适配器用。"""
+    kp = KeyPair.generate()
+    return kp.pk, kp.sk
+
+

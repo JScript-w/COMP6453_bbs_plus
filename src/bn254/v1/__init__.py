@@ -2,7 +2,7 @@ from .keygen import KeyPair
 from .signer import sign, update_attributes, re_randomise
 from src.bn254.v1.verifier import verify
 from .zkproof import prove_disclosure, verify_disclosure
-
+from .utils import get_h_bases
 
 __all__ = [
     "KeyPair",
@@ -12,4 +12,5 @@ __all__ = [
     "re_randomise",
     "prove_disclosure",
     "verify_disclosure",
+    "get_h_bases",
 ]
