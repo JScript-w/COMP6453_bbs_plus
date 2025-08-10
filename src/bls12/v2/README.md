@@ -40,50 +40,46 @@ bbs_plus/
 
 BBS+签名基于**Type-3双线性配对群**，使用三个循环群：
 
-- **G₁, G₂**: 阶为素数p的椭圆曲线群
-- **Gₜ**: 目标群
-- **配对函数**: e: G₁ × G₂ → Gₜ
+- **$G_1$, $G_2$**: 阶为素数p的椭圆曲线群
+- **$G_t$**: 目标群
+- **配对函数**: $$e: \; G_1 \times G_2 \rightarrow G_t$$
 
 ### 2. 密钥结构
 
 与传统签名方案不同，BBS+使用**双私钥结构**：
 
-```
-私钥: (x, y) ∈ Zₚ × Zₚ
-公钥: (X, Y) = (g₂ˣ, g₂ʸ) ∈ G₂ × G₂
-基点: {h₀, h₁, ..., hₗ} ∈ G₁
-```
+私钥: $(x, y) \in Z_p \times Z_p$
+公钥: $(X, Y) = (g_2^x, g_2^y) \in G_2 \times G_2$
+基点: $\{h_0, h_1, ..., h_l\} \in G_1$
 
 其中：
 
-- `h₀`: 用于盲化因子的基点
-- `h₁, ..., hₗ`: 每个消息属性对应的基点
+- $h_0$: 用于盲化因子的基点
+- $h_1, ..., h_l$: 每个消息属性对应的基点
 
 ### 3. 签名生成
 
-对于消息集合 `{m₁, m₂, ..., mₗ}`，签名算法：
+对于消息集合 ${m_1, m_2, ..., m_l}$，签名算法：
 
-```
-1. 选择随机数 r ← Zₚ
-2. 计算 A = (g₁ · h₀ʳ · ∏ᵢ₌₁ˡ hᵢᵐⁱ)^(1/(x + y·r))
-3. 输出签名 σ = (A, r)
-```
+1. 选择随机数 $r \leftarrow Z_p$
+2. 计算 $A = (g_1 \cdot h_0^r \cdot \prod_{i=1}^l h_i^m)^{\frac{1}{x + y \cdot r}}$
+3. 输出签名 $σ = (A, r)$
 
 **核心公式**：
 
-$A = (g₁ \cdot h_0^r \cdot \prod_{i=1}^l h_i^mⁱ)^(\frac{1}{x + y·r})$
+$A = (g_1 \cdot h_0^r \cdot \prod_{i=1}^l h_i^{m_i}ⁱ)^{\frac{1}{x + y \cdot r}}$
 
 ### 4. 签名验证
 
 验证方程基于配对的双线性性质：
 
-$e(A, X \cdot Y^r) ?= e(g₁ · h_0^r \cdot ∏ᵢ₌₁ˡ hᵢᵐⁱ, g₂)$
+$e(A, X \cdot Y^r) \; ?= e(g_1 \cdot h_0^r \cdot \prod_{i=1}^l h_i^mⁱ, g_2)$
 
 **验证原理**：
 
-- 左边：`e(A, X · Yʳ) = e(A, g₂ˣ · g₂ʸʳ) = e(A, g₂^(x+y·r))`
-- 右边：`e(g₁ · h₀ʳ · ∏hᵢᵐⁱ, g₂)`
-- 由于 `A = (...)^(1/(x+y·r))`，两边相等
+- 左边：$e(A, X \cdot Y^r) = e(A, g_2^x · g_2^{yr}) = e(A, g_2^{(x + y \cdot r)})$
+- 右边：$e(g_1 \cdot h_0^r \cdot \prod h_i^{m_i}ⁱ, g_2)$
+- 由于 $A = (...)^{\frac{1}{x+y·r}}$，两边相等
 
 ### 5. 零知识证明（选择性披露）
 
@@ -92,23 +88,22 @@ $e(A, X \cdot Y^r) ?= e(g₁ · h_0^r \cdot ∏ᵢ₌₁ˡ hᵢᵐⁱ, g₂)$
 #### 证明生成步骤：
 
 1. **承诺阶段**：
-   - 为隐藏值生成随机承诺：`r̃ ← Zₚ`, `m̃ⱼ ← Zₚ`
-   - 计算承诺：`T₁ = h₀^r̃ · ∏ⱼ∈H hⱼ^m̃ⱼ`
-   - 计算：`T₂ = Y^r̃`
+   - 为隐藏值生成随机承诺：$r̃ \leftarrow Z_p$, $m̃ⱼ \leftarrow Z_p$
+   - 计算承诺：$T_1 = h_0^r̃ \cdot \prod_{j \in H} h_j^{m̃_j}$
+   - 计算：$T_2 = Y^r̃$
 
 2. **挑战生成**（Fiat-Shamir）：
-   - `c = Hash(A, T₁, T₂, T₃, {mᵢ}ᵢ∈D)`
+   - $c = Hash(A, T_1, T_2, T_3, {m_i}({i \in D}))$
 
 3. **响应计算**：
-   - `ẑᵣ = r̃ + c·r`
-   - `ẑₘⱼ = m̃ⱼ + c·mⱼ` (对所有隐藏消息)
+   - $ẑᵣ = r̃ + c \cdot r$
+   - $ẑ_{m_j} = m̃_j + c·m_j$ (对所有隐藏消息)
 
 #### 验证方程：
 
 验证者检查：
 
-- 承诺重构：`T₁ ?= h₀^ẑᵣ · ∏ⱼ∈H hⱼ^ẑₘⱼ · T₁^(-c)`
-- 配对验证：`e(A^c, X · Y^ẑᵣ · T₂^(-1)) ?= e(B, g₂^c)`
+- 配对验证：$e(A^c, X \cdot Y^{ẑ_r} \cdot T_2^{(-1)}) ?= e(B, g_2^c)$
 
 ## 🚀 使用示例
 
@@ -247,14 +242,6 @@ is_valid = verify(pk, randomized_sig, messages)
 3. **IETF标准草案**: "The BBS Signature Scheme" (draft-irtf-cfrg-bbs-signatures)
 4. **配对曲线**: "BLS12-381 For The Rest Of Us"
 
-## 📝 许可证
-
-本项目采用Apache 2.0许可证
-
 ## 🤝 贡献
 
 欢迎提交Issue和Pull Request！
-
----
-
--
