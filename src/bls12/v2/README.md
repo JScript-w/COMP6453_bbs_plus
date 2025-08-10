@@ -42,7 +42,7 @@ BBS+ is built on **Type-3 bilinear pairing groups** with three cyclic groups：
 
 - **$G_1$, $G_2$**: Elliptic-curve groups of prime order p
 - **$G_t$**: Target group
-- **Pairing function**: $$e: \quad G_1 \times G_2 \rightarrow G_t$$
+- **Pairing function** $$e: \quad G_1 \times G_2 \rightarrow G_t$$
 
 ### 2. Key
 
