@@ -104,7 +104,7 @@ def verify_disclosure(pk, proof, total_attrs):
     hidden_bases = [h_bases[i] for i in s_vec.keys()]
     msg_commit = add(
         msg_commit,
-        add(msm_g1(hidden_bases, hidden_scalars), g1_mul(commit, -1)),
+        add(msm_g1(hidden_bases, hidden_scalars), g1_mul(commit, curve_order - 1)),
     )
 
     lhs = pair(g1_mul(A, c), add(pk, g2_mul(g2, e)))
@@ -117,7 +117,7 @@ def verify_disclosure(pk, proof, total_attrs):
     )
 
     if c != _hash_fs(transcript):
-        print("挑战重构失败")
+        print("Challenge Reconstruction Failure!")
         return False
 
     return lhs == rhs

@@ -1,6 +1,6 @@
 """
-BBS+ 零知识证明模块 - 优化版本
-实现选择性披露的零知识证明协议
+BBS+ Zero-Knowledge Proof Module - Optimized Version
+Implementation of a zero-knowledge proof protocol with selective disclosure
 """
 
 from hashlib import sha256
