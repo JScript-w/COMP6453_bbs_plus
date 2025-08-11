@@ -5,6 +5,7 @@
 We have implemented two versions of the BBS+ signature scheme using the BLS12-381 elliptic curve. Details of these two versions can be found at:
 
 [BLS12_V1](./src/bls12/v1/README.md)
+
 [BLS12_V2](./src/bls12/v2/README.md)
 
 ## Installation
