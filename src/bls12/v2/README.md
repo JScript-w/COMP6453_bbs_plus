@@ -104,11 +104,11 @@ A **Schnorr-like Sigma Protocol** is used for selective disclosure：
 #### Verification checks:
 
 $$
-hidden_part = h_0^{\hat{z}_r} \cdot \prod_{j \in H} h_j^{\hat{z}_{m_j}} \cdot T_1^{(-1)}
+\text{hidden_part} = h_0^{\hat{z}_r} \cdot \prod_{j \in H} h_j^{\hat{z}_{m_j}} \cdot T_1^{(-1)}
 $$
 
 $$
-B = g_1^c \cdot \prod_{i \in D} h_i^{c \cdot m_i} \cdot hidden_part
+B = g_1^c \cdot \prod_{i \in D} h_i^{c \cdot m_i} \cdot \text{hidden_part}
 $$
 
 $$
