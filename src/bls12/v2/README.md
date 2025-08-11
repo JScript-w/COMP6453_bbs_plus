@@ -69,7 +69,7 @@ For messages ${m_1, m_2, ..., m_l}$, the signing algorithm：
 
 **Core formula**：
 
-$A = (g_1 \cdot h_0^r \cdot \prod_{i=1}^l h_i^{m_i}ⁱ)^{\frac{1}{x + y \cdot r}}$
+$A = (g_1 \cdot h_0^r \cdot \prod_{i=1}^l h_i^{m_i})^{\frac{1}{x + y \cdot r}}$
 
 ### 4. Verification
 
