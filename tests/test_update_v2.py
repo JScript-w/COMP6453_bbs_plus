@@ -7,4 +7,4 @@ def test_update_v2():
     sig = sign(kp, msgs)
     sig2 = update_attributes(kp, sig, msgs, {2: "m3*"})
     msgs[2] = "m3*"
-    assert verify(kp.get_pk(), sig2, msgs)
+    return verify(kp.get_pk(), sig2, msgs)

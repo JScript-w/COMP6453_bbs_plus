@@ -6,7 +6,4 @@ def test_proof_v2():
     msgs = ["x", "y", "z"]
     sig = sign(kp, msgs)
     proof = prove_disclosure(kp.get_pk(), sig, msgs, disclosed_indices=[1])
-    if verify_disclosure(kp.get_pk(), proof):
-        print("Success!")
-    else:
-        print("Failed!")
+    return verify_disclosure(kp.get_pk(), proof)

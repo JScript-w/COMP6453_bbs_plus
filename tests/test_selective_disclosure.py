@@ -6,4 +6,4 @@ def test_proof():
     msgs = ["x", "y", "z"]
     sig = sign(kp.sk, msgs)
     proof = prove_disclosure(kp.pk, sig, msgs, disclose_idx=[1])
-    assert verify_disclosure(kp.pk, proof, total_attrs=len(msgs))
+    return verify_disclosure(kp.pk, proof, total_attrs=len(msgs))

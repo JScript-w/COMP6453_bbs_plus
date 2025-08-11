@@ -12,9 +12,12 @@ def bench(n_attrs: int, runs: int = 20):
 
 
 def begin_bench():
-    print("==========BLS12-V1===========")
+    print()
+    print("=" * 10 + " BLS_V1 " + "=" * 10)
     print(" n |  sign (ms) | verify (ms)")
     print("---+------------+------------")
     for n in (1, 5, 10, 20):
         s, v = bench(n)
         print(f"{n:2} | {s:10.3f} | {v:10.3f}")
+
+    print()
