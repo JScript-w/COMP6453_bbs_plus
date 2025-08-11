@@ -90,9 +90,17 @@ A **Schnorr-like Sigma Protocol** is used for selective disclosure：
 #### Proof generation：
 
 1. **Commitment**：
-   - Sample：$r̃ \leftarrow Z_p$, $m̃_j \leftarrow Z_p$
-   - Compute commitment T1：$T_1 = h_0^r̃ \cdot \prod_{j \in H} h_j^{m̃_j}$
-   - Compute commitment T2：$T_2 = Y^r̃$
+   - Sample：
+     - $r̃ \leftarrow Z_p$
+     - $m̃_j \leftarrow Z_p$
+
+   - Compute commitment T1：
+
+     $$T_1 = h_0^r̃ \cdot \prod_{j \in H} h_j^{m̃_j}$$
+
+   - Compute commitment T2：
+
+   $$T_2 = Y^r̃$$
 
 2. **Challenge**（Fiat-Shamir）：
    - $c = Hash(A, T_1, T_2, T_3, {m_i}({i \in D}))$
