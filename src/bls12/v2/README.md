@@ -105,7 +105,7 @@ A **Schnorr-like Sigma Protocol** is used for selective disclosure：
 
 1. Compute B:
 
-   ```math
+   ```latex
    B = g_1^c \cdot \prod_{i \in D} h_i^{c \cdot m_i} \cdot (h_0^{\hat{z}_r} \cdot \prod_{j \in H} h_j^{\hat{z}_{m_j}} \cdot T_1^{(-1)})$
    ```
 
