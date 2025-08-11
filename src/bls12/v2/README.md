@@ -15,7 +15,7 @@ This project is a Python implementation of the BBS+ (Boneh-Boyen-Shacham Plus) s
 ## 🏗️ Module export interface
 
 ```
-bbs_plus/
+v2/
 ├── __init__.py           # Module export interface
 ├── keygen_v2.py          # Key generation
 ├── signer_v2.py          # Signature creation, update, and re-randomization
