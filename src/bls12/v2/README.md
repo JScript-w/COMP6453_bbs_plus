@@ -49,7 +49,9 @@ BBS+ is built on **Type-3 bilinear pairing groups** with three cyclic groups：
 Unlike traditional schemes, BBS+ uses a **dual-secret** structure:
 
 Secret key: $(x, y) \in Z_p \times Z_p$
+
 Public key: $(X, Y) = (g_2^x, g_2^y) \in G_2 \times G_2$
+
 Bases: $\{h_0, h_1, ..., h_l\} \in G_1$
 
 Where：
