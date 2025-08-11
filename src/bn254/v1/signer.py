@@ -1,80 +1,58 @@
-from ..params import curve_order,rand_scalar, g1_mul, g2_mul, msm_g1, pair, g1, g2, add, curve_order
-from .utils import encode_attributes, get_h_bases, ensure_scalar, _scalars_digest, build_U_and_ms
+# bn254/v1/signer.py
+from __future__ import annotations
+import os, hashlib
+from bn254 import backend_pyecc as ecc
 
+def _ser_g1(P):
+    return P.serialize() if hasattr(P, "serialize") else bytes(P)
 
-# Internal ------------------------------------------------------------------ #
-def _compute_A(x, e, h_bases, m_scalars):
-    """
-    计算参数 A。
-    常见形式：U = g1 + Σ H_i^{m_i}；A = U^{(x+e)^{-1} mod r}
-    """
-    # 1) 规范化标量类型
-    x = int(x) % curve_order
-    e = ensure_scalar(e)  # ← 关键：bytes/str/int 都变成 [0, r) 内的 int
+def _ser_g2(Q):
+    return Q.serialize() if hasattr(Q, "serialize") else bytes(Q)
 
-    # 2) 基本合法性检查
-    if h_bases and m_scalars and len(h_bases) != len(m_scalars):
-        raise ValueError(f"len(h_bases)={len(h_bases)} != len(m_scalars)={len(m_scalars)}")
+def _digest_g1(P):
+    return hashlib.blake2b(_ser_g1(P), digest_size=16).hexdigest()
 
-    # 3) 计算 U = g1 + Σ H_i^{m_i}
-    hm = msm_g1(h_bases, m_scalars) if m_scalars else None
-    U  = add(g1, hm) if hm is not None else g1
+def sign(sk: bytes | int, attrs: list[bytes | int]) -> tuple[bytes, bytes]:
+    ecc._ensure_mcl()
 
-    # 4) 计算 (x + e)^(-1) mod r（避免 0）
-    denom = (x + e) % curve_order
-    if denom == 0:
-        # 极小概率事件：e ≡ -x (mod r)
-        raise ZeroDivisionError("x + e == 0 (mod r); please resample e")
+    # 1) 归一化 sk
+    if isinstance(sk, bytes):
+        x = int.from_bytes(sk, "big") % ecc.curve_order
+    elif isinstance(sk, int):
+        x = sk % ecc.curve_order
+    else:
+        raise TypeError("Unsupported secret key type for signing")
 
-    denom_inv = pow(denom, -1, curve_order)  # Python 3.8+：负幂求模逆
+    # 2) 构造 U = g1 + Σ H_i^{m_i}
+    U = ecc.g1  # 注意：mcl 的点是不可变语义，这里直接用加法得到新点
+    m_ints = []
+    for i, a in enumerate(attrs):
+        m = int.from_bytes(a, "big") % ecc.curve_order if isinstance(a, (bytes, bytearray)) else int(a) % ecc.curve_order
+        m_ints.append(m)
+        Hi = ecc.hash_to_g1(f"H{i}")
+        U = ecc.add(U, ecc.g1_mul(Hi, m))
 
-    # 5) A = U ^ denom_inv
-    return g1_mul(U, denom_inv)
+    # 3) 随机 e，计算 A = U^{1/(x+e)}
+    e_scalar = ecc.rand_scalar()
+    while (x + e_scalar) % ecc.curve_order == 0:
+        e_scalar = ecc.rand_scalar()
+    denom = (x + e_scalar) % ecc.curve_order
+    inv_denom = pow(denom, -1, ecc.curve_order)
+    A_point = ecc.g1_mul(U, inv_denom)
 
+    if os.getenv("BBS_DEBUG") == "1":
+        denom = (x + e_scalar) % ecc.curve_order
+        # 直接检查：A*(x+e) 是否等于 U
+        U2 = ecc.g1_mul(A_point, denom)
+        eq_U = (ecc._ser_g1(U2) == ecc._ser_g1(U)) if hasattr(ecc, "_ser_g1") else (U2.serialize() == U.serialize())
+        print("[sign] A*(x+e) == U ? ", eq_U)
 
-# Public API ---------------------------------------------------------------- #
-def sign(sk, attrs):
-    # 1) 统一构造 U / m_scalars（与 verifier 完全一致）
-    U, h_bases, m_scalars = build_U_and_ms(attrs)
+        T_local = ecc.g2_mul(ecc.g2, denom)  # (x+e)·g2
+        lhs = ecc.pair(A_point, T_local)
+        rhs = ecc.pair(U, ecc.g2)
+        print("[sign] pair(A,(x+e)·g2) == pair(U,g2)?", bool(lhs == rhs))
 
-    # 2) 随机 e（真实 BBS+ 做法）；调试阶段可改成确定性但两侧要同步
-    e = rand_scalar()
-
-    # 3) A = U^{(x+e)^{-1}}
-    x = int(sk) % curve_order
-    denom = (x + e) % curve_order
-    if denom == 0:
-        raise ZeroDivisionError("x + e == 0 (mod r); resample e")
-    denom_inv = pow(denom, -1, curve_order)
-    A = g1_mul(U, denom_inv)
-
-    # 4) 自检（打印一次，便于确认签名内自洽）
-    try:
-        ok = (pair(A, g2_mul(g2, denom)) == pair(U, g2))
-        print("[sign] U vs A check:", ok)
-        # 你也可以打印摘要
-        # print("[sign] m_digest=", _scalars_digest(m_scalars))
-    except Exception:
-        pass
-
-    return (A, e)
-
-
-def update_attributes(sk: int, sig, messages_old: list[str], updates: dict[int, str]):
-    A_old, e = sig
-    messages_new = messages_old[:]
-    for idx, v in updates.items():
-        messages_new[idx] = v
-    h_bases = [g1_mul(g1, i + 2) for i in range(len(messages_new))]
-    m_scalars = encode_attributes(messages_new)
-    A_new = _compute_A(sk, e, h_bases, m_scalars)
-    return A_new, e
-
-
-def re_randomise(sig):
-    A, e = sig
-    r = rand_scalar()
-    return A, (e + r) % curve_order
-
-
-
+    # 4) 输出 (A_bytes, e_bytes)
+    A_bytes = _ser_g1(A_point)
+    e_bytes = e_scalar.to_bytes(32, "big")
+    return (A_bytes, e_bytes)

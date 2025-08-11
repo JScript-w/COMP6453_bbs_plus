@@ -59,14 +59,14 @@ class V1BN254SIMDBackend(IBbsBackend):
         if HAS_SET_OPTIM:
             v1_utils.set_optim(optim)
 
-    def keygen(self) -> Tuple[bytes, bytes]:
-        # 兼容两种可能的函数名：keygen() 或 generate_keypair()
-        if hasattr(v1_keygen, "keygen"):
-            return v1_keygen.keygen()
-        elif hasattr(v1_keygen, "generate"):
-            return v1_keygen.generate()
-        else:
-            raise AttributeError("v1.keygen: 未找到 keygen()/generate()")
+    def keygen(self):
+        # v1.keygen() 返回 (sk, pk)；适配层对外统一返回 (pk, sk)
+        res = v1_keygen.keygen()
+        if isinstance(res, (tuple, list)) and len(res) == 2:
+            sk_bytes, pk_bytes = res
+            return pk_bytes, sk_bytes
+        # 兼容其它形式（几乎用不到）
+        return res
 
     def sign(self, sk: bytes, msg: bytes, attrs: Sequence[bytes]) -> bytes:
         fn = getattr(v1_signer, "sign", None) or getattr(v1_signer, "sign_message", None)

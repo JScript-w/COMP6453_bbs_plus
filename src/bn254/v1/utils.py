@@ -2,7 +2,7 @@ import hashlib
 from ..params import rand_scalar, g1_mul, g1, curve_order, msm_g1, add
 
 from ..backend_pyecc import G1
-
+from mclbn256 import G1 as _MclG1
 def hash_to_scalar(data: bytes) -> int:
     """
     字节串到标量的哈希映射
