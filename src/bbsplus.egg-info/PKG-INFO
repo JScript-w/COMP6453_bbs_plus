@@ -1,5 +1,6 @@
 Metadata-Version: 2.4
 Name: bbsplus
 Version: 0.1.0
+Requires-Dist: mcl>=0.0.6
 Requires-Dist: mclbn256>=1.3.5
 Requires-Dist: py-ecc>=8

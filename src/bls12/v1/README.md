@@ -4,30 +4,33 @@ This project implements the BBS+ multi-message signature scheme based on the BLS
 
 ---
 
-##  Core Mathematical Formulas
+## Core Mathematical Formulas
 
-###  Key Generation
+### Key Generation
 
-1. Private Key:  
+1. Private Key:
+
    $$
    sk \in \mathbb{Z}_p \quad \text{(a random scalar)}
    $$
 
-2. Public Key:  
+2. Public Key:
    $$
    pk = g_2^{sk}
    $$
 
 ---
 
-###  Signature
+### Signature
 
-Signature structure:  
+Signature structure:
+
 $$
 \sigma = (A, e)
 $$
 
-- Signature computation:  
+- Signature computation:
+
   $$
   A = \left(g_1 \cdot \prod_{i=1}^n h_i^{m_i}\right)^{\frac{1}{sk + e}} \mod p
   $$
@@ -36,7 +39,7 @@ $$
 
 ---
 
-###  Verification
+### Verification
 
 Signature is valid if the following pairing equation holds:
 
@@ -46,7 +49,7 @@ $$
 
 ---
 
-##  Project Structure
+## Project Structure
 
 ```
 COMP6453_bbs_plus-main/
@@ -56,23 +59,23 @@ COMP6453_bbs_plus-main/
 │   └── bls12/
 │       ├── v1/              # Optimized version (fixed structure, fast sign)
 │       └── v2/              # Standard version (sign time grows with n)
-├── binding_kss16/           # Optional: KSS16 C/C++ binding implementation (not enabled)
 ├── tests/                   # Unit tests and performance benchmarks
 ```
 
 ---
 
-##  Installation and Usage
+## Installation and Usage
 
-###  Requirements
+### Requirements
+
 - Python 3.10+
 - `uv` package manager (recommended)
 - Linux/macOS/WSL environment (due to limitations of py_ecc on Windows)
 
-###  Install dependencies
+### Install dependencies
 
 ```bash
-uv pip install -r requirements.txt
+uv sync
 ```
 
 Activate the virtual environment (first time):
@@ -89,7 +92,7 @@ python main.py
 
 ---
 
-##  Usage
+## Usage
 
 After running, an interactive CLI menu appears:
 
@@ -122,7 +125,7 @@ Two implementations were tested:
 ### bls12_v2 (default)
 
 | Number of Attributes (n) | Sign Time (ms) | Verify Time (ms) |
-|--------------------------|----------------|------------------|
+| ------------------------ | -------------- | ---------------- |
 | 1                        | 41.251         | 11322.060        |
 | 5                        | 127.184        | 11338.829        |
 | 10                       | 222.612        | 11513.343        |
@@ -130,7 +133,7 @@ Two implementations were tested:
 ### bls12_v1 (optimized)
 
 | Number of Attributes (n) | Sign Time (ms) | Verify Time (ms) |
-|--------------------------|----------------|------------------|
+| ------------------------ | -------------- | ---------------- |
 | 1                        | 21.897         | 11703.461        |
 | 5                        | 22.033         | 11595.577        |
 | 10                       | 21.650         | 11824.938        |
@@ -140,7 +143,7 @@ Two implementations were tested:
 
 ---
 
-##  References
+## References
 
 - Boneh, D., Boyen, X., & Shacham, H. (2004). Short Group Signatures.
 - BBS+ Signatures in AnonCreds: https://identity.foundation/bbs-signature/

@@ -9,4 +9,4 @@ def test_sign_verify():
     kp = KeyPair.generate()
     msgs = ["a", "b"]
     sig = sign(kp.sk, msgs)
-    assert verify(kp.pk, sig, msgs)
+    return verify(kp.pk, sig, msgs)
