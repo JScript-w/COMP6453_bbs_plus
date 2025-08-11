@@ -79,8 +79,7 @@ $e(A, X \cdot Y^r) \\; ?= e(g_1 \cdot h_0^r \cdot \prod_{i=1}^l h_i^mⁱ, g_2)$
 
 **Explanation:**
 
-- Left:
-  $e(A, X \cdot Y^r) = e(A, g_2^x · g_2^{yr}) = e(A, g_2^{(x + y \cdot r)})$
+- Left: $e(A, X \cdot Y^r) = e(A, g_2^x · g_2^{yr}) = e(A, g_2^{(x + y \cdot r)})$
 - Right: $e(g_1 \cdot h_0^r \cdot \prod h_i^{m_i}ⁱ, g_2)$
 - Since $A = (...)^{\frac{1}{x+y·r}}$, both sides are equal.
 
@@ -91,26 +90,18 @@ A **Schnorr-like Sigma Protocol** is used for selective disclosure：
 #### Proof generation：
 
 1. **Commitment**:
-   - Sample:
-     - $r̃ \leftarrow Z_p$
-     - $m̃_j \leftarrow Z_p$
+   - Sample: $r̃ \leftarrow Z_p$, $m̃_j \leftarrow Z_p$
+   - Compute commitment T1: $$T_1 = h_0^r̃ \cdot \prod_{j \in H} h_j^{m̃_j}$$
+   - Compute commitment T2: $$T_2 = Y^r̃$$
 
-   - Compute commitment T1：
-
-     $$T_1 = h_0^r̃ \cdot \prod_{j \in H} h_j^{m̃_j}$$
-
-   - Compute commitment T2：
-
-   $$T_2 = Y^r̃$$
-
-2. **Challenge**（Fiat-Shamir）：
+2. **Challenge** (Fiat-Shamir):
    - $c = Hash(A, T_1, T_2, T_3, {m_i}({i \in D}))$
 
-3. **Response**：
+3. **Response**:
    - $ẑᵣ = r̃ + c \cdot r$
    - $ẑ_{m_j} = m̃_j + c·m_j$ (for all hidden messages)
 
-#### Verification checks：
+#### Verification checks:
 
 $$e(A^c, X \cdot Y^{ẑ_r} \cdot T_2^{(-1)}) ?= e(B, g_2^c)$$
 
