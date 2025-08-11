@@ -3,7 +3,7 @@ from src.bls12.v2 import KeyPair, sign, verify
 
 
 def bench(n_attrs: int, runs: int = 20):
-    kp = KeyPair.generate(5)
+    kp = KeyPair.generate(n_attrs)
     msgs = [f"m{i}" for i in range(n_attrs)]
     sign_t = timeit.timeit(lambda: sign(kp, msgs), number=runs) / runs
     sig = sign(kp, msgs)
