@@ -59,22 +59,23 @@ The system will run the test and output the time consumed for signing and verify
 
 Two implementations were tested:
 
-### bls12_v1 (Default)
+### bls12_v1 (Faster)
 
 | Number of Attributes (n) | Sign Time (ms) | Verify Time (ms) |
 | ------------------------ | -------------- | ---------------- |
-| 1                        | 21.897         | 11703.461        |
-| 5                        | 22.033         | 11595.577        |
-| 10                       | 21.650         | 11824.938        |
-| 20                       | 21.920         | 12053.933        |
+| 1                        | 28.645         | 5959.375         |
+| 5                        | 84.792         | 5994.605         |
+| 10                       | 153.817        | 6073.008         |
+| 20                       | 297.823        | 6419.118         |
 
 ### bls12_v2 (Dual secret-key)
 
 | Number of Attributes (n) | Sign Time (ms) | Verify Time (ms) |
 | ------------------------ | -------------- | ---------------- |
-| 1                        | 41.251         | 11322.060        |
-| 5                        | 127.184        | 11338.829        |
-| 10                       | 222.612        | 11513.343        |
+| 1                        | 44.767         | 6187.042         |
+| 5                        | 102.516        | 6250.037         |
+| 10                       | 101.651        | 6244.830         |
+| 20                       | 101.840        | 6252.118         |
 
 > Note: Verification time remains high due to use of pure Python `py_ecc` pairing library. Consider switching to a C-based library like `blst` or `mcl` for faster pairing operations.
 
