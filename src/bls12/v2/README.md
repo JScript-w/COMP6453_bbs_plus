@@ -79,9 +79,9 @@ $e(A, X \cdot Y^r) \\; ?= e(g_1 \cdot h_0^r \cdot \prod_{i=1}^l h_i^mⁱ, g_2)$
 
 **Explanation:**
 
-- Left：
+- Left:
   $e(A, X \cdot Y^r) = e(A, g_2^x · g_2^{yr}) = e(A, g_2^{(x + y \cdot r)})$
-- Right：$e(g_1 \cdot h_0^r \cdot \prod h_i^{m_i}ⁱ, g_2)$
+- Right: $e(g_1 \cdot h_0^r \cdot \prod h_i^{m_i}ⁱ, g_2)$
 - Since $A = (...)^{\frac{1}{x+y·r}}$, both sides are equal.
 
 ### 5. Zero-Knowledge Proofs (Selective Disclosure)
@@ -90,8 +90,8 @@ A **Schnorr-like Sigma Protocol** is used for selective disclosure：
 
 #### Proof generation：
 
-1. **Commitment**：
-   - Sample：
+1. **Commitment**:
+   - Sample:
      - $r̃ \leftarrow Z_p$
      - $m̃_j \leftarrow Z_p$
 
