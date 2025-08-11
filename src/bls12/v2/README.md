@@ -75,11 +75,11 @@ $A = (g_1 \cdot h_0^r \cdot \prod_{i=1}^l h_i^{m_i}ⁱ)^{\frac{1}{x + y \cdot r}
 
 Verification relies on bilinearity:
 
-$e(A, X \cdot Y^r) \; ?= e(g_1 \cdot h_0^r \cdot \prod_{i=1}^l h_i^mⁱ, g_2)$
+$e(A, X \cdot Y^r) \\; ?= e(g_1 \cdot h_0^r \cdot \prod_{i=1}^l h_i^mⁱ, g_2)$
 
 **Explanation:**
 
-- Left：$e(A, X \cdot Y^r) = e(A, g_2^x · g_2^{yr}) = e(A, g_2^{(x + y \cdot r)})$
+- Left：$ e(A, X \cdot Y^r) = e(A, g_2^x · g_2^{yr}) = e(A, g_2^{(x + y \cdot r)}) $
 - Right：$e(g_1 \cdot h_0^r \cdot \prod h_i^{m_i}ⁱ, g_2)$
 - Since $A = (...)^{\frac{1}{x+y·r}}$, both sides are equal.
 
