@@ -1,6 +1,13 @@
 # BBS+
 
-## Installation and Usage
+## Introduction
+
+We have implemented two versions of the BBS+ signature scheme using the BLS12-381 elliptic curve. Details of these two versions can be found at:
+
+[BLS12_V1](./src/bls12/v1/README.md)
+[BLS12_V2](./src/bls12/v2/README.md)
+
+## Installation
 
 ### Requirements
 
@@ -23,7 +30,7 @@ source .venv/bin/activate
 Run the main program to test:
 
 ```bash
-python main.py
+uv run main.py
 ```
 
 ---
@@ -33,10 +40,10 @@ python main.py
 After running, an interactive CLI menu appears:
 
 ```text
-1. basic                # Basic signing and verification
-2. selective_disclosure# Selective disclosure (if implemented)
-3. update              # Key update (if implemented)
-4. bench               # Performance benchmark for sign/verify
+1. basic                 # Basic signing and verification
+2. selective_disclosure  # Selective disclosure (if implemented)
+3. update                # Key update (if implemented)
+4. bench                 # Performance benchmark for sign/verify
 0. Exit
 Input test type number:
 ```
