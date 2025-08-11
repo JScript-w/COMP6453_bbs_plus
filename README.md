@@ -71,19 +71,19 @@ Two implementations were tested:
 
 | Number of Attributes (n) | Sign Time (ms) | Verify Time (ms) |
 | ------------------------ | -------------- | ---------------- |
-| 1                        | 28.645         | 5959.375         |
-| 5                        | 84.792         | 5994.605         |
-| 10                       | 153.817        | 6073.008         |
-| 20                       | 297.823        | 6419.118         |
+| 1                        | 31.288         | 6188.981         |
+| 5                        | 92.619         | 6264.377         |
+| 10                       | 166.947        | 6343.696         |
+| 20                       | 308.661        | 6458.902         |
 
 ### bls12_v2 (Dual secret-key)
 
 | Number of Attributes (n) | Sign Time (ms) | Verify Time (ms) |
 | ------------------------ | -------------- | ---------------- |
-| 1                        | 44.767         | 6187.042         |
-| 5                        | 102.516        | 6250.037         |
-| 10                       | 101.651        | 6244.830         |
-| 20                       | 101.840        | 6252.118         |
+| 1                        | 43.445         | 6177.910         |
+| 5                        | 101.797        | 6232.624         |
+| 10                       | 172.807        | 6327.362         |
+| 20                       | 325.710        | 6456.706         |
 
 > Note: Verification time remains high due to use of pure Python `py_ecc` pairing library. Consider switching to a C-based library like `blst` or `mcl` for faster pairing operations.
 
