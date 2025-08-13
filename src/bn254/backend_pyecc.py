@@ -4,7 +4,7 @@ backend_pyecc.py — BN-254 implementation via **mclbn256**
 
 * Drop-in replacement for the old py-ecc backend; **file name stays the same**.
 * Uses Herumi MCL’s Python binding (`pip install mclbn256`). SIMD (AVX2/512) is
-  enabled automatically on x86-64 Linux/macOS wheels.
+  automatically enabled on x86-64 Linux/macOS wheels.
 * All public symbols (`curve_order`, `G1`, `G2`, `rand_scalar`, `g1_mul`,
   `g2_mul`, `msm_g1`, `pair`, …) keep the same names so that upper-layer BBS+
   code runs unchanged.
@@ -18,16 +18,16 @@ from mclbn256 import G1 as _G1, G2 as _G2, Fr
 from ctypes import create_string_buffer
 from mclbn256 import lib as _lib
 
-# 你的 mcl 绑定不需要显式 init；保持兼容，如果没有 init 就什么都不做
+# Your mcl binding does not require explicit init; keep compatibility,
+# do nothing if there is no init
 _MCL_READY = True
-
 
 _FR_METHOD = None  # 'bytes_le32' | 'hex16' | 'dec10' | '0xhex144' | 'disabled'
 
 def _try_fr_new_fromstr(payload: bytes, mode: int) -> bool:
     try:
         v = Fr.new_fromstr(payload, mode)
-        # 读一遍整数，确保对象可用
+        # Read the integer to ensure the object is usable
         _ = int(v)
         return True
     except Exception:
@@ -35,16 +35,16 @@ def _try_fr_new_fromstr(payload: bytes, mode: int) -> bool:
 
 def _detect_fr_method():
     """
-    只在首次调用时运行：
-    选出一条能同时处理 small=123 与 big=(r-1) 的 fromstr 路径。
-    否则标记为 'disabled'，后续直接走整数乘法。
+    Runs only on first call:
+    Select a fromstr method that can handle both small=123 and big=(r-1).
+    If none works, mark as 'disabled' and fallback to integer multiplication.
     """
     global _FR_METHOD
     if _FR_METHOD is not None:
         return
 
     small = 123 % curve_order
-    big   = (curve_order - 1)  # 最苛刻的样本
+    big   = (curve_order - 1)  # toughest sample
 
     candidates = [
         ("bytes_le32",
@@ -68,12 +68,12 @@ def _detect_fr_method():
             _FR_METHOD = name
             return
 
-    # 没有任何一条能同时覆盖 -> 禁用 Fr 路径，统一走整数乘法
+    # If none can handle both, disable Fr path and always use integer multiplication
     _FR_METHOD = "disabled"
 
 
 def _ensure_mcl():
-    # 某些环境有 mcl.init，这里做个“有则用之，无则跳过”的兼容
+    # Some environments have mcl.init; use if available, otherwise skip
     if hasattr(mcl, "init"):
         try:
             mcl.init(mcl.BN254)
@@ -88,22 +88,22 @@ curve_order: int = 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f00
 G1: _G1 = _G1.base_point()
 G2: _G2 = _G2.base_point()
 
-g1 = G1            # lowercase aliases kept for historic code
+g1 = G1            # lowercase aliases kept for backward compatibility
 g2 = G2
 
-# Additive identities (handy for equality checks)
-ZERO_G1: _G1 = _G1()  # same as G1.zero() but explicit
+# Additive identities (useful for equality checks)
+ZERO_G1: _G1 = _G1()  # same as G1.zero(), but explicit
 ZERO_G2: _G2 = _G2()
 
 # ────────────────────────────────────────────────────────────────
 # 2. Scalar helpers
 # ────────────────────────────────────────────────────────────────
 
-# --- 替换 _to_fr 为稳健版，并在入口确保初始化 ---
+# --- Replace _to_fr with a robust version and ensure initialization at entry ---
 def _to_fr(k: int) -> Fr:
     _detect_fr_method()
     if _FR_METHOD == "disabled":
-        # 提醒上层 multiply 走整数兜底；不要在这里 print 以免刷屏
+        # Notify upper layers to use integer multiply fallback; don’t print here to avoid spam
         raise ValueError("Fr path disabled on this system")
 
     k = int(k) % curve_order
@@ -116,10 +116,8 @@ def _to_fr(k: int) -> Fr:
     elif _FR_METHOD == "0xhex144":
         return Fr.new_fromstr(b"0x" + f"{k:064x}".encode(), 144)
     else:
-        # 理论上不会走到
+        # Should never reach here
         raise ValueError("Unsupported _FR_METHOD")
-
-
 
 
 def rand_scalar() -> int:
@@ -140,7 +138,7 @@ def add(P, Q):  # noqa: N802 — keep original name
 
 
 def _clone_point(P):
-    # 用 serialize/deserialize 断开别名；支持 G1/G2
+    # Break aliasing using serialize/deserialize; supports G1/G2
     try:
         C = P.__class__
         if hasattr(C, "deserialize") and (hasattr(P, "serialize") or hasattr(P, "__bytes__")):
@@ -148,56 +146,56 @@ def _clone_point(P):
             return C.deserialize(raw)
     except Exception:
         pass
-    # 兜底：返回原对象（一般不会走到）
+    # Fallback: return original object (should rarely happen)
     return P
 
 def _zero_like(P):
-    # 用 P - P 得到库认可的“真零点”
+    # Get the library-recognized "true zero point" by P - P
     try:
         return P - P
     except Exception:
-        # 极端兜底：clone 后相减
+        # Extreme fallback: clone and subtract
         Q = _clone_point(P)
         return Q - Q
 
 def _safe_add(P, Q):
-    # 对输入先 clone，避免库在 __add__ 里就地修改入参
+    # Clone inputs first to avoid in-place modification inside __add__
     P2, Q2 = _clone_point(P), _clone_point(Q)
     R = P2 + Q2
-    # 再 clone 一次输出，避免后续使用同一实例
+    # Clone output again to avoid reusing the same instance later
     return _clone_point(R)
 
 def _safe_double(P):
-    # 避免“自加”别名：用 clone 后相加
+    # Avoid aliasing in "self-add": clone first, then add
     return _safe_add(P, P)
 
-# --- 标量乘：Montgomery ladder（MSB-first），无别名，无自加 ---
+# --- Scalar multiplication: Montgomery ladder (MSB-first), no aliasing, no self-add ---
 def _mul_int_generic(P, k: int):
     """
-    预计算二进制幂表 + 累加（不对“中间结果”做加倍）：
-    - 先构造 table[i] = (2^i)·P
-    - 然后把 k 的二进制位为 1 的 table[i] 累加即可
+    Precompute binary power table + accumulate (no doubling of intermediate results):
+    - Build table[i] = (2^i)·P
+    - Then sum up table[i] for each 1-bit in k
     """
     k = int(k) % curve_order
     if k == 0:
-        # 返回“零点”：用 clone 不破坏 P；尽量避免对 P 做原地操作
+        # Return "zero point": use clone to avoid modifying P in place
         try:
             return P - P
         except Exception:
-            # 极端兜底：如果不支持一元负号，退化成“加 curve_order 次”拿零点（几乎不会走到）
+            # Extreme fallback: if unary minus unsupported, degrade to "add curve_order times"
             R = P
             for _ in range(curve_order - 1):
                 R = R + P
             return R
 
-    # 1) 预计算幂表
+    # 1) Precompute power table
     bits = k.bit_length()
     table = [None] * bits
     table[0] = P
     for i in range(1, bits):
         table[i] = table[i - 1] + table[i - 1]   # 2^(i)·P = 2^(i-1)·P + 2^(i-1)·P
 
-    # 2) 累加选中的幂
+    # 2) Accumulate selected powers
     R = None
     idx = 0
     kk = k
@@ -219,7 +217,7 @@ def g2_mul(Q, k: int):
     return _mul_int_generic(Q, k)
 
 def msm_g1(bases: List[_G1], scalars: List[int]) -> _G1:
-    """Naïve O(n) multi-scalar-mul (can swap for Pippenger later)."""
+    """Naïve O(n) multi-scalar multiplication (can replace with Pippenger later)."""
     acc: _G1 | None = None
     for B, s in zip(bases, scalars):
         acc = add(acc, g1_mul(B, s))
@@ -227,10 +225,10 @@ def msm_g1(bases: List[_G1], scalars: List[int]) -> _G1:
 
 # ────────────────────────────────────────────────────────────────
 # 4. Pairing
-# ────────────────────────────────────────────────
+# ────────────────────────────────────────────────────────────────
 
 def pair(P: _G1, Q: _G2):
-    """Bilinear pairing e(P, Q) ∈ GT; '@' already does final-exp."""
+    """Bilinear pairing e(P, Q) ∈ GT; '@' already performs final exponentiation."""
     return P @ Q
 
 # Legacy alias expected by some modules
@@ -245,10 +243,10 @@ def hash_to_g1(data) -> _G1:
         data = data.encode()
     P = _G1()
     if hasattr(P, "hash"):
-        P.hash(data)                # 常见接口
+        P.hash(data)                # Common interface
         return P
     if hasattr(_G1, "fromhash"):
-        return _G1.fromhash(data)   # 有些封装是 classmethod
+        return _G1.fromhash(data)   # Some wrappers implement this as a classmethod
     raise RuntimeError("Your mclbn256 binding lacks G1.hash()/G1.fromhash()")
 
 # ────────────────────────────────────────────────────────────────
@@ -272,6 +270,3 @@ __all__ = [
     "ecc_add",
     "hash_to_g1",
 ]
-
-
-
