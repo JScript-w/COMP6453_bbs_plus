@@ -15,4 +15,4 @@ def get_backend(name: BackendName = "v1", optim: OptimConfig | None = None) -> I
     elif name == "pyecc":
         return PYECCBackend(optim)
     else:
-        raise ValueError(f"未知后端：{name}")
+        raise ValueError(f"Unknown backend: {name}")
