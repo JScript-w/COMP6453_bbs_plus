@@ -18,7 +18,7 @@ def _digest_g2(Q):
 def verify(pk: bytes | object, sig, attrs: list[bytes | int]) -> bool:
     ecc._ensure_mcl()
 
-    # 1) 解析 pk
+    # 1) Parse pk (public key)
     if isinstance(pk, (bytes, bytearray)):
         try:
             pk_point = ecc._G2.deserialize(pk)
@@ -29,7 +29,7 @@ def verify(pk: bytes | object, sig, attrs: list[bytes | int]) -> bool:
     else:
         raise TypeError("Unsupported public key type")
 
-    # 2) 解析签名 (A, e)
+    # 2) Parse signature (A, e)
     if isinstance(sig, (tuple, list)) and len(sig) >= 2:
         A_val, e_val = sig[0], sig[1]
     elif hasattr(sig, "A") and hasattr(sig, "e"):
@@ -51,7 +51,7 @@ def verify(pk: bytes | object, sig, attrs: list[bytes | int]) -> bool:
 
     e_int = int.from_bytes(e_val, "big") % ecc.curve_order if isinstance(e_val, (bytes, bytearray)) else int(e_val) % ecc.curve_order
 
-    # 3) 重新构造 U
+    # 3) Reconstruct U
     U = ecc.g1
     m_ints = []
     for i, a in enumerate(attrs):
@@ -60,7 +60,7 @@ def verify(pk: bytes | object, sig, attrs: list[bytes | int]) -> bool:
         Hi = ecc.hash_to_g1(f"H{i}")
         U = ecc.add(U, ecc.g1_mul(Hi, m))
 
-    # 4) 配对等式
+    # 4) Pairing equation check
     T = ecc.add(pk_point, ecc.g2_mul(ecc.g2, e_int))  # pk + e·g2
     lhs = ecc.pair(A_point, T)
     rhs = ecc.pair(U, ecc.g2)
