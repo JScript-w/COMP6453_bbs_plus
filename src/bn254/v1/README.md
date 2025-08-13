@@ -1,17 +1,17 @@
-# BLS椭圆曲线实现BBS+签名 v1.0
+# BBS+ Signature on BLS Elliptic Curve v1.0
 
-## 核心数学公式
+## Core Mathematical Formulas
 
-### 密钥
+### Keys
 
-1. 私钥：
-   $sk \in \mathbb{Z}_p$ (单个随机标量)
-2. 公钥：
+1. Private Key:
+   $sk \in \mathbb{Z}_p$ (a single random scalar)
+2. Public Key:
    $pk = g_2^{sk}$
 
-### 签名
+### Signature
 
-签名结构：
+Signature Structure:
 $(A, e)$
 
 - $A = (g_1 \cdot \prod{h_i}^{m_i})^{(\frac{1}{(sk+e)} \mod p)}$
