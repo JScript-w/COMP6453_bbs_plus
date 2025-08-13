@@ -1,33 +1,34 @@
 # bn254/params.py
 import os
 
-BACKEND = os.getenv("BN254_BACKEND", "pyecc")  # 可切: "mcl" / "pyecc"
+# Selectable backend: "mcl" / "pyecc"
+BACKEND = os.getenv("BN254_BACKEND", "pyecc")
 
 if BACKEND == "mcl":
-    # TODO: 有了 mcl 实现后，把下面的导入路径改成你的 mcl 模块
-    from bn254.backend_mcl import (  # ← 先占位；没有就别切 mcl
+    # TODO: Once the mcl implementation is ready, update the import path to your mcl module
+    from bn254.backend_mcl import (  # ← Placeholder; if unavailable, don't switch to mcl
         g1_mul, g2_mul, g1, g2, curve_order, rand_scalar, add, pair, msm_g1
     )
     BACKEND_NAME = "mcl"
 else:
-    # 现阶段走 pyecc，并确保 backend_pyecc 里 Fr 初始化和 _to_fr 已修好
+    # For now, use pyecc and ensure that Fr initialization and _to_fr are fixed in backend_pyecc
     from bn254.backend_pyecc import (
         g1_mul, g2_mul, g1, g2, curve_order, rand_scalar, add
     )
     BACKEND_NAME = "pyecc"
 
-    # 有些符号 pyecc 里可能没有 -> 提供兜底实现
+    # Some symbols may be missing in pyecc -> provide fallback implementations
     try:
-        from bn254.backend_pyecc import pair  # 若实现了就用
+        from bn254.backend_pyecc import pair  # Use if implemented
     except Exception:
         def pair(P, Q):
             raise NotImplementedError("pair is not available in pyecc backend")
 
     try:
-        from bn254.backend_pyecc import msm_g1  # 若实现了就用
+        from bn254.backend_pyecc import msm_g1  # Use if implemented
     except Exception:
         def msm_g1(bases, scalars):
-            """naive MSM 兜底：∑ s_i * B_i"""
+            """Naive MSM fallback: ∑ s_i * B_i"""
             acc = None
             for B, s in zip(bases, scalars):
                 pt = g1_mul(B, s)
