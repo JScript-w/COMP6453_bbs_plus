@@ -5,39 +5,39 @@ from bn254.optim.config import OptimConfig
 from bn254.backends.base import IBbsBackend
 from bn254.utils.instrumentation import maybe_profile_section
 
-# 直接复用你现有的 bn254/backend_pyecc.py
+# Directly reuse your existing bn254/backend_pyecc.py
 import bn254.backend_pyecc as pyecc
 
 class PYECCBackend(IBbsBackend):
     name = "pyecc_bn254_baseline"
     curve = "BN254"
-    simd = False  # 作为非 SIMD 基线
+    simd = False  # Used as a non-SIMD baseline
 
     def __init__(self, optim: OptimConfig):
         self.optim = optim
-        # 如果 backend_pyecc 有配置入口，可在这里传入；否则忽略
+        # If backend_pyecc has a configuration entry, pass it here; otherwise, ignore.
 
     def keygen(self) -> Tuple[bytes, bytes]:
         fn = getattr(pyecc, "keygen", None) or getattr(pyecc, "generate_keypair", None)
         if fn is None:
-            raise AttributeError("backend_pyecc: 未找到 keygen()/generate_keypair()")
+            raise AttributeError("backend_pyecc: keygen()/generate_keypair() not found")
         return fn()
 
     def sign(self, sk: bytes, msg: bytes, attrs: Sequence[bytes]) -> bytes:
         fn = getattr(pyecc, "sign", None) or getattr(pyecc, "sign_message", None)
         if fn is None:
-            raise AttributeError("backend_pyecc: 未找到 sign()/sign_message()")
+            raise AttributeError("backend_pyecc: sign()/sign_message() not found")
         with maybe_profile_section(self.optim.profile, "pyecc.sign"):
             return fn(sk, msg, attrs)
 
     def verify(self, pk: bytes, sig: bytes, msg: bytes, attrs: Sequence[bytes]) -> bool:
         fn = getattr(pyecc, "verify", None) or getattr(pyecc, "verify_signature", None)
         if fn is None:
-            raise AttributeError("backend_pyecc: 未找到 verify()/verify_signature()")
+            raise AttributeError("backend_pyecc: verify()/verify_signature() not found")
         with maybe_profile_section(self.optim.profile, "pyecc.verify"):
             return fn(pk, sig, msg, attrs)
 
-    # pyecc 通常没有 zk；如果有，请补适配
+    # pyecc usually does not have zk; if it does, please add the adaptation
     def prove(self, *args, **kwargs) -> Any:
         raise NotImplementedError
 
