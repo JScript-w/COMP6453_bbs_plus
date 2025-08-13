@@ -4,11 +4,12 @@ from typing import Protocol, Sequence, Tuple, Any
 from dataclasses import dataclass
 from bn254.optim.config import OptimConfig
 
-BytesLike = bytes  # 简化；后续可扩展 memoryview/bytearray
+BytesLike = bytes  # Simplified; can be extended later to include memoryview/bytearray
 
 class IBbsBackend(Protocol):
     """
-    统一后端接口。所有后端（v1 / pyecc / 其他）都实现这套方法。
+    Unified backend interface. 
+    All backends (v1 / pyecc / others) must implement this set of methods.
     """
     name: str
     curve: str
@@ -16,11 +17,11 @@ class IBbsBackend(Protocol):
 
     def __init__(self, optim: OptimConfig): ...
 
-    # 基础 API
+    # Basic API
     def keygen(self) -> Tuple[BytesLike, BytesLike]: ...
     def sign(self, sk: BytesLike, msg: BytesLike, attrs: Sequence[BytesLike]) -> BytesLike: ...
     def verify(self, pk: BytesLike, sig: BytesLike, msg: BytesLike, attrs: Sequence[BytesLike]) -> bool: ...
 
-    # （可选）选择性披露 / 证明 API —— 仅当你在 v1/zkproof.py 已实现
+    # (Optional) Selective Disclosure / Proof API — Only if implemented in v1/zkproof.py
     def prove(self, pk: BytesLike, sig: BytesLike, disclosed: Sequence[int], attrs: Sequence[BytesLike], msg: BytesLike) -> Any: ...
     def verify_proof(self, pk: BytesLike, proof: Any, disclosed: Sequence[int], msg: BytesLike) -> bool: ...
