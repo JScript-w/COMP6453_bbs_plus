@@ -5,12 +5,13 @@ from dataclasses import dataclass
 @dataclass
 class OptimConfig:
     """
-    统一的性能/实现参数。后端按需读取；无影响的参数可以忽略。
+    Unified performance/implementation configuration. 
+    Backends read parameters as needed; parameters that have no effect can be ignored.
     """
-    window: int | None = None          # MSM 窗口大小（后续用于 wNAF/固定窗）
-    precompute: bool = False           # 是否启用预计算表
-    threads: int = 1                   # 并行度/线程数
-    batch: int = 1                     # 基准/批量 API 的缺省 batch
-    seed: int = 42                     # 可复现实验
-    serialize_compressed: bool = True  # （预留）序列化策略
-    profile: bool = False              # 是否输出详细计时
+    window: int | None = None          # MSM window size (used later for wNAF/fixed window)
+    precompute: bool = False           # Whether to enable precomputation tables
+    threads: int = 1                   # Level of parallelism / number of threads
+    batch: int = 1                     # Default batch size for benchmark/batch APIs
+    seed: int = 42                     # Seed for reproducible experiments
+    serialize_compressed: bool = True  # (Reserved) Serialization strategy
+    profile: bool = False              # Whether to output detailed timing
