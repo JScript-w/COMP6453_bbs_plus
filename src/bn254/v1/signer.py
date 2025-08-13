@@ -15,7 +15,7 @@ def _digest_g1(P):
 def sign(sk: bytes | int, attrs: list[bytes | int]) -> tuple[bytes, bytes]:
     ecc._ensure_mcl()
 
-    # 1) 归一化 sk
+    # 1) Normalize sk
     if isinstance(sk, bytes):
         x = int.from_bytes(sk, "big") % ecc.curve_order
     elif isinstance(sk, int):
@@ -23,8 +23,8 @@ def sign(sk: bytes | int, attrs: list[bytes | int]) -> tuple[bytes, bytes]:
     else:
         raise TypeError("Unsupported secret key type for signing")
 
-    # 2) 构造 U = g1 + Σ H_i^{m_i}
-    U = ecc.g1  # 注意：mcl 的点是不可变语义，这里直接用加法得到新点
+    # 2) Construct U = g1 + Σ H_i^{m_i}
+    U = ecc.g1  # Note: mcl points are immutable; use addition to produce a new point
     m_ints = []
     for i, a in enumerate(attrs):
         m = int.from_bytes(a, "big") % ecc.curve_order if isinstance(a, (bytes, bytearray)) else int(a) % ecc.curve_order
@@ -32,7 +32,7 @@ def sign(sk: bytes | int, attrs: list[bytes | int]) -> tuple[bytes, bytes]:
         Hi = ecc.hash_to_g1(f"H{i}")
         U = ecc.add(U, ecc.g1_mul(Hi, m))
 
-    # 3) 随机 e，计算 A = U^{1/(x+e)}
+    # 3) Random e, compute A = U^{1/(x+e)}
     e_scalar = ecc.rand_scalar()
     while (x + e_scalar) % ecc.curve_order == 0:
         e_scalar = ecc.rand_scalar()
@@ -42,7 +42,7 @@ def sign(sk: bytes | int, attrs: list[bytes | int]) -> tuple[bytes, bytes]:
 
     if os.getenv("BBS_DEBUG") == "1":
         denom = (x + e_scalar) % ecc.curve_order
-        # 直接检查：A*(x+e) 是否等于 U
+        # Direct check: does A * (x+e) equal U?
         U2 = ecc.g1_mul(A_point, denom)
         eq_U = (ecc._ser_g1(U2) == ecc._ser_g1(U)) if hasattr(ecc, "_ser_g1") else (U2.serialize() == U.serialize())
         print("[sign] A*(x+e) == U ? ", eq_U)
@@ -52,7 +52,7 @@ def sign(sk: bytes | int, attrs: list[bytes | int]) -> tuple[bytes, bytes]:
         rhs = ecc.pair(U, ecc.g2)
         print("[sign] pair(A,(x+e)·g2) == pair(U,g2)?", bool(lhs == rhs))
 
-    # 4) 输出 (A_bytes, e_bytes)
+    # 4) Output (A_bytes, e_bytes)
     A_bytes = _ser_g1(A_point)
     e_bytes = e_scalar.to_bytes(32, "big")
     return (A_bytes, e_bytes)
