@@ -1,85 +1,83 @@
 """
-后端抽象层
+Backend Abstraction Layer
 
-提供椭圆曲线运算的统一接口，基于py_ecc库封装
+Provides a unified interface for elliptic curve operations, 
+wrapped around the py_ecc library.
 """
 
 from py_ecc.bls12_381.bls12_381_curve import (
-    curve_order,  # 椭圆曲线的阶数p
-    G1,  # G1群的生成元 (椭圆曲线上的点)
-    G2,  # G2群的生成元 (扭曲椭圆曲线上的点)
-    add,  # 椭圆曲线点加法运算
-    multiply,  # 椭圆曲线标量乘法运算
+    curve_order,  # The order p of the elliptic curve
+    G1,  # Generator of group G1 (a point on the elliptic curve)
+    G2,  # Generator of group G2 (a point on the twisted elliptic curve)
+    add,  # Elliptic curve point addition
+    multiply,  # Elliptic curve scalar multiplication
 )
 
 from py_ecc.bls12_381.bls12_381_pairing import (
-    pairing,  # 双线性配对 e: G1 × G2 → GT
-    final_exponentiate,  # 配对的最终指数运算
+    pairing,  # Bilinear pairing e: G1 × G2 → GT
+    final_exponentiate,  # Final exponentiation step for pairings
 )
-
 
 import secrets
 
 # -----------------------------------------------
-# Scalars 标量运算函数
-
+# Scalars — Scalar operation functions
 
 def rand_scalar() -> int:
     """
-    生成加密学安全的随机标量
+    Generate a cryptographically secure random scalar.
 
     Returns:
-        int: a random scalar ∈ ℤₚ \\ {0}.
+        int: A random scalar in ℤₚ \ {0}.
     """
     return secrets.randbelow(curve_order - 1) + 1
 
 
 # ----------------------------
-# Group helpers 群运算辅助函数
-
+# Group helpers — Group operation helper functions
 
 def g1_mul(P, k: int):
     """
-    G1群上的标量乘法
+    Scalar multiplication in group G1.
 
-    这个函数接受参数P和k，返回生成元g1，
+    This function takes a point P and a scalar k, and returns P multiplied by k.
 
     Args:
-        P (Point2D): G1内的点
-        k (int): Zp内的标量
+        P (Point2D): A point in G1
+        k (int): A scalar in ℤₚ
 
     Returns:
-        Point2D: 椭圆曲线上的点坐标
+        Point2D: Coordinates of the resulting point on the elliptic curve
     """
-    return multiply(P, k % curve_order)  # (k mod curve_order)确保在正确范围内
+    return multiply(P, k % curve_order)  # (k mod curve_order) ensures the scalar is in range
 
 
 def g2_mul(Q, k: int):
     """
-    G2群上的标量乘法
+    Scalar multiplication in group G2.
 
     Args:
-        Q (Point2D): G2内的点
-        k (int): Zp内的标量
+        Q (Point2D): A point in G2
+        k (int): A scalar in ℤₚ
 
     Returns:
-        Point2D: G2内的点
+        Point2D: A point in G2
     """
     return multiply(Q, k % curve_order)
 
 
 def msm_g1(bases, scalars):
     """
-    多标量乘法
+    Multi-scalar multiplication.
 
-    高效计算多个基点和标量的乘积和
+    Efficiently compute the sum of products of multiple base points and scalars.
 
     Args:
-        bases (List[Point2D[Field]]): G1群点的列表[P1, P2, ..., Pn]
-        scalars (int): 标量列表[k1, k2, ..., kn]
+        bases (List[Point2D[Field]]): List of G1 points [P1, P2, ..., Pn]
+        scalars (List[int]): List of scalars [k1, k2, ..., kn]
 
     Returns:
-        Point2D[Field]: ∑(Pi · ki) ∈ G1
+        Point2D[Field]: The result ∑(Pi · ki) ∈ G1
     """
     acc = None
     for B, s in zip(bases, scalars):
@@ -90,12 +88,13 @@ def msm_g1(bases, scalars):
 
 def pair(P, Q):
     """
-    双线性配对运算
+    Bilinear pairing operation.
 
     Returns:
-
+        GT element: The result of e(P, Q) after final exponentiation.
     """
     return final_exponentiate(pairing(Q, P))
 
 
+# Alias for addition operation
 ecc_add = add
