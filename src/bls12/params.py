@@ -1,5 +1,5 @@
 """
-Re‑Exports for core library so the rest of the code stays backend‑agnostic.
+Re-Exports for the core library so the rest of the code remains backend-agnostic.
 """
 
 from .backend_pyecc import (
@@ -11,10 +11,9 @@ from .backend_pyecc import (
     ecc_add as add,
     G1,
     G2,
-    curve_order,  # 群的阶数
+    curve_order,  # Order of the group
 )
 
-
-# Canonical generators (tuples from py‑ecc)
-g1 = G1  # G1群生成元
-g2 = G2  # G2群生成元
+# Canonical generators (tuples from py-ecc)
+g1 = G1  # Generator of group G1
+g2 = G2  # Generator of group G2
